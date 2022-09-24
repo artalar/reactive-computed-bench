@@ -1,4 +1,12 @@
-## Apple m1
+This benchmark measured computation of complex computed reactive unit when it deep children change.
+
+## Contribution
+
+Just select a test with familiar API with your own library, copy it, modify it, don't forget to add your results to correctness test (`new Set` check).
+
+## Results
+
+### Apple m1
 
 Median on one call in ms from 10 iterations
 
@@ -87,7 +95,7 @@ Median of sum calc of reactive nodes in list from 1000 to 1
 | $mol_wire | 100   | 0.013  | 0.00475 | 0.01346 | 0.03063 |
 | reatom    | 19    | 0.070  | 0.01662 | 0.06979 | 0.13879 |
 
-## Gitpod (AMD EPYC 7B13)
+### Gitpod (AMD EPYC 7B13)
 
 Median on one call in ms from 10 iterations
 
