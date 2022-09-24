@@ -1,0 +1,49 @@
+{
+  "name": "reactive-computed-bench",
+  "private": true,
+  "description": "Benchmarks of complex computed update performance",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "author": "artalar",
+  "license": "MIT",
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/artalar/reactive-computed-bench.git"
+  },
+  "engines": {
+    "npm": ">=8.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/artalar/reactive-computed-bench/issues"
+  },
+  "homepage": "https://github.com/artalar/reactive-computed-bench/tree/main",
+  "devDependencies": {
+    "@frp-ts/core": "^1.0.0-beta.2",
+    "@ngrx/store": "^14.3.0",
+    "@preact/signals-core": "^1.2.0",
+    "@types/node": "latest",
+    "cellx": "^1.10.29",
+    "effector": "^22.3.0",
+    "mobx": "^6.6.1",
+    "mol_wire_lib": "^1.0.296",
+    "redux": "^4.2.0",
+    "reselect": "^4.1.6",
+    "s-js": "^0.4.9",
+    "solid-js": "^1.5.4",
+    "tsx": "^3.9.0",
+    "typescript": "^4.8.2",
+    "usignal": "^0.7.15",
+    "uvu": "^0.5.6",
+    "wonka": "^6.0.0",
+    "@reatom/core": "alpha"
+  },
+  "keywords": [
+    "reactive",
+    "reactivity",
+    "computed",
+    "bench",
+    "perf"
+  ]
+}
