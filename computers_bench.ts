@@ -454,12 +454,10 @@ function setupComputersTest(tests: Rec<Setup>) {
 
 test()
 async function test() {
-  await Promise.all([
-    testComputers(10, 5),
-    testComputers(100, 0),
-    testComputers(1_000, 0),
-    testComputers(10_000, 0),
-  ])
+  await testComputers(10, 5)
+  await testComputers(100, 0)
+  await testComputers(1_000, 0)
+  await testComputers(10_000, 0)
 
   process.exit()
 }
