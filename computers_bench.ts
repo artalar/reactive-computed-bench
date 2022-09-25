@@ -408,11 +408,11 @@ function setupComputersTest(tests: Rec<Setup>) {
       )
 
       printLogs(
-        testsList.reduce(
-          (acc, { name, creationLogs }) => (
-            (acc[name] = formatLog(creationLogs)), acc
-          ),
-          {} as Rec<any>,
+        Object.fromEntries(
+          testsList.map(({ name, creationLogs }) => [
+            name,
+            formatLog(creationLogs),
+          ]),
         ),
       )
     }
@@ -429,9 +429,8 @@ function setupComputersTest(tests: Rec<Setup>) {
         console.log(`ERROR!`)
         console.error(`Results is not equal (iteration №${i})`)
         console.log(
-          testsList.reduce(
-            (acc, test) => ((acc[test.name] = test.ref.value), acc),
-            {} as Rec<number>,
+          Object.fromEntries(
+            testsList.map(({ name, ref }) => [name, ref.value]),
           ),
         )
         return
