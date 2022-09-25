@@ -1,6 +1,6 @@
 This benchmark measured computation of complex computed reactive unit when it deep children change.
 
-## Results (outdated)
+## Results
 
 ### Apple m1
 
