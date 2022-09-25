@@ -361,8 +361,7 @@ const testComputers = setupComputersTest({
 })
 
 function setupComputersTest(tests: Rec<Setup>) {
-  return async (iterations: number) => {
-    const creationTries = 5
+  return async (iterations: number, creationTries: number) => {
     const testsList: Array<{
       ref: { value: number }
       update: UpdateLeaf
@@ -379,7 +378,7 @@ function setupComputersTest(tests: Rec<Setup>) {
       let update: UpdateLeaf
       let start = 0
       let end = 0
-      let i = creationTries
+      let i = creationTries || 1
 
       while (i--) {
         update = await tests[name]!({
@@ -403,18 +402,20 @@ function setupComputersTest(tests: Rec<Setup>) {
       })
     }
 
-    console.log(
-      `Median of computers creation and linking from ${creationTries} iterations\n(UNSTABLE)`,
-    )
+    if (creationTries > 0) {
+      console.log(
+        `Median of computers creation and linking from ${creationTries} iterations\n(UNSTABLE)`,
+      )
 
-    printLogs(
-      testsList.reduce(
-        (acc, { name, creationLogs }) => (
-          (acc[name] = formatLog(creationLogs)), acc
+      printLogs(
+        testsList.reduce(
+          (acc, { name, creationLogs }) => (
+            (acc[name] = formatLog(creationLogs)), acc
+          ),
+          {} as Rec<any>,
         ),
-        {} as Rec<any>,
-      ),
-    )
+      )
+    }
 
     let i = 0
     while (i++ < iterations) {
@@ -455,10 +456,10 @@ function setupComputersTest(tests: Rec<Setup>) {
 test()
 async function test() {
   await Promise.all([
-    testComputers(10),
-    testComputers(100),
-    testComputers(1_000),
-    testComputers(10_000),
+    testComputers(10, 5),
+    testComputers(100, 0),
+    testComputers(1_000, 0),
+    testComputers(10_000, 0),
   ])
 
   process.exit()
