@@ -6,15 +6,21 @@ type Rec<T = any> = Record<string, T>
 
 type UpdateLeaf = (value: number) => void
 
-type Setup = (listener: (computedValue: number) => void) => Promise<UpdateLeaf>
+type Setup = (hooks: {
+  listener: (computedValue: number) => void
+  startCreation: () => void
+  endCreation: () => void
+}) => Promise<UpdateLeaf>
 
 // There is a few tests skipped
 // coz I don't know how to turn off their batching
 // which delays computations
 
 const testComputers = setupComputersTest({
-  async 'skip cellx'(listener) {
+  async 'skip cellx'({ listener, startCreation, endCreation }) {
     const { cellx } = await import('cellx')
+
+    startCreation()
 
     const entry = cellx(0)
     const a = cellx(() => entry())
@@ -28,6 +34,8 @@ const testComputers = setupComputersTest({
 
     listener(h())
 
+    endCreation()
+
     return (i) => {
       entry(i)
       // this is wrong
@@ -36,8 +44,10 @@ const testComputers = setupComputersTest({
       listener(h())
     }
   },
-  async effector(listener) {
+  async effector({ listener, startCreation, endCreation }) {
     const { createEvent, createStore, combine } = await import('effector')
+
+    startCreation()
 
     const entry = createEvent<number>()
     const a = createStore(0).on(entry, (state, v) => v)
@@ -51,11 +61,15 @@ const testComputers = setupComputersTest({
 
     h.subscribe(listener)
 
+    endCreation()
+
     return (i) => entry(i)
   },
-  async 'effector (fork)'(listener) {
+  async 'effector (fork)'({ listener, startCreation, endCreation }) {
     const { createEvent, createStore, combine, allSettled, fork } =
       await import('effector')
+
+    startCreation()
 
     const entry = createEvent<number>()
     const a = createStore(0).on(entry, (state, v) => v)
@@ -69,6 +83,8 @@ const testComputers = setupComputersTest({
 
     const scope = fork()
 
+    endCreation()
+
     return (i) => {
       allSettled(entry, { scope, params: i })
       // this is not wrong
@@ -78,8 +94,10 @@ const testComputers = setupComputersTest({
       listener(scope.getState(h))
     }
   },
-  async 'skip frpts'(listener) {
+  async 'skip frpts'({ listener, startCreation, endCreation }) {
     const { newAtom, combine } = await import('@frp-ts/core')
+
+    startCreation()
 
     const entry = newAtom(0)
     const a = combine(entry, (v) => v)
@@ -93,6 +111,8 @@ const testComputers = setupComputersTest({
 
     listener(h.get())
 
+    endCreation()
+
     return (i) => {
       entry.set(i)
       // this is wrong
@@ -101,10 +121,12 @@ const testComputers = setupComputersTest({
       listener(h.get())
     }
   },
-  async mobx(listener) {
+  async mobx({ listener, startCreation, endCreation }) {
     const { makeAutoObservable, autorun, configure } = await import('mobx')
 
     configure({ enforceActions: 'never' })
+
+    startCreation()
 
     const proxy = makeAutoObservable({
       entry: 0,
@@ -136,11 +158,15 @@ const testComputers = setupComputersTest({
 
     autorun(() => listener(proxy.h))
 
+    endCreation()
+
     return (i) => (proxy.entry = i)
   },
-  async 'skip mol'(listener) {
+  async 'skip mol'({ listener, startCreation, endCreation }) {
     const mol_wire_lib = await import('mol_wire_lib')
     const { $mol_wire_atom } = mol_wire_lib
+
+    startCreation()
 
     const entry = new $mol_wire_atom('entry', (next: number = 0) => next)
     const a = new $mol_wire_atom('mA', () => entry.sync())
@@ -154,6 +180,8 @@ const testComputers = setupComputersTest({
 
     listener(h.sync())
 
+    endCreation()
+
     return (i) => {
       entry.put(i)
       // this is wrong
@@ -162,8 +190,10 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
-  async preact(listener) {
+  async preact({ listener, startCreation, endCreation }) {
     const { signal, computed, effect } = await import('@preact/signals-core')
+
+    startCreation()
 
     const entry = signal(0)
     const a = computed(() => entry.value)
@@ -177,10 +207,15 @@ const testComputers = setupComputersTest({
 
     effect(() => listener(h.value))
 
+    endCreation()
+
     return (i) => (entry.value = i)
   },
-  async reatom(listener) {
+  async reatom({ listener, startCreation, endCreation }) {
     const { atom, createCtx } = await import('@reatom/core')
+
+    startCreation()
+
     const a = atom(0)
     const b = atom((ctx) => ctx.spy(a) + 1)
     const c = atom((ctx) => ctx.spy(a) + 1)
@@ -193,14 +228,18 @@ const testComputers = setupComputersTest({
     const ctx = createCtx()
     ctx.subscribe(h, listener)
 
+    endCreation()
+
     return (i) => a(ctx, i)
   },
-  async solid(listener) {
+  async solid({ listener, startCreation, endCreation }) {
     const { createSignal, createMemo, createEffect } = await import(
       // FIXME
       // @ts-ignore
       'solid-js/dist/solid.cjs'
     )
+
+    startCreation()
 
     const [entry, update] = createSignal(0)
     const a = createMemo(() => entry())
@@ -214,12 +253,16 @@ const testComputers = setupComputersTest({
 
     createEffect(() => listener(h()))
 
+    endCreation()
+
     return (i) => update(i)
   },
-  async 's.js'(listener) {
+  async 's.js'({ listener, startCreation, endCreation }) {
     const { default: S } = await import('s-js')
 
-    const { entry, h } = S.root(() => {
+    startCreation()
+
+    const entry = S.root(() => {
       const entry = S.data(0)
       const a = S(() => entry())
       const b = S(() => a() + 1)
@@ -230,15 +273,19 @@ const testComputers = setupComputersTest({
       const g = S(() => d() + e())
       const h = S(() => f() + g())
 
-      return { entry, h }
+      S(() => listener(h()))
+
+      return entry
     })
 
-    S(() => listener(h()))
+    endCreation()
 
     return (i) => entry(i)
   },
-  async usignal(listener) {
+  async usignal({ listener, startCreation, endCreation }) {
     const { signal, computed, effect } = await import('usignal')
+
+    startCreation()
 
     const entry = signal(0)
     const a = computed(() => entry.value)
@@ -252,9 +299,11 @@ const testComputers = setupComputersTest({
 
     effect(() => listener(h.value))
 
+    endCreation()
+
     return (i) => (entry.value = i)
   },
-  async wonka(listener) {
+  async wonka({ listener, startCreation, endCreation }) {
     const { makeSubject, pipe, map, subscribe, combine, sample } = await import(
       'wonka'
     )
@@ -267,6 +316,8 @@ const testComputers = setupComputersTest({
       // return source
       return pipe(source, sample(source))
     }
+
+    startCreation()
 
     const entry = makeSubject<number>()
     const a = pipe(
@@ -303,32 +354,72 @@ const testComputers = setupComputersTest({
     )
     pipe(h, subscribe(listener))
 
+    endCreation()
+
     return (i) => entry.next(i)
   },
 })
 
 function setupComputersTest(tests: Rec<Setup>) {
   return async (iterations: number) => {
+    const creationTries = 5
     const testsList: Array<{
       ref: { value: number }
       update: UpdateLeaf
       name: string
-      logs: Array<number>
+      creationLogs: Array<number>
+      updateLogs: Array<number>
     }> = []
 
     for (const name in tests) {
       if (name.startsWith('skip')) continue
+
       const ref = { value: 0 }
-      const update = await tests[name]!((value) => (ref.value = value))
-      testsList.push({ ref, update, name, logs: [] })
+      const creationLogs: Array<number> = []
+      let update: UpdateLeaf
+      let start = 0
+      let end = 0
+      let i = creationTries
+
+      while (i--) {
+        update = await tests[name]!({
+          listener: (value) => (ref.value = value),
+          startCreation: () => (start = performance.now()),
+          endCreation: () => (end = performance.now()),
+        })
+
+        creationLogs.push(end - start)
+
+        // try to prevent optimization of code meaning throwing
+        update(-1)
+      }
+
+      testsList.push({
+        ref,
+        update: update!,
+        name,
+        creationLogs,
+        updateLogs: [],
+      })
     }
+
+    console.log(
+      `Median of computers creation and linking from ${creationTries} iterations\n(UNSTABLE)`,
+    )
+
+    printLogs(
+      testsList.reduce(
+        (acc, { name, creationLogs }) => ((acc[name] = log(creationLogs)), acc),
+        {} as Rec<any>,
+      ),
+    )
 
     let i = 0
     while (i++ < iterations) {
       for (const test of testsList) {
         const start = performance.now()
         test.update(i)
-        test.logs.push(performance.now() - start)
+        test.updateLogs.push(performance.now() - start)
       }
 
       if (new Set(testsList.map((test) => test.ref.value)).size !== 1) {
@@ -350,7 +441,7 @@ function setupComputersTest(tests: Rec<Setup>) {
 
     printLogs(
       testsList.reduce(
-        (acc, { name, logs }) => ((acc[name] = log(logs)), acc),
+        (acc, { name, updateLogs }) => ((acc[name] = log(updateLogs)), acc),
         {} as Rec<any>,
       ),
     )
