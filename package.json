@@ -3,7 +3,7 @@
   "private": true,
   "description": "Benchmarks of complex computed update performance",
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx computers_bench.ts"
   },
   "author": "artalar",
   "license": "MIT",
