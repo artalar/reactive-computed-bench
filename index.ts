@@ -1,527 +1,375 @@
 import { performance } from 'perf_hooks'
-import * as effector from 'effector'
-import * as w from 'wonka'
-import { cellx } from 'cellx'
-import mol_wire_lib from 'mol_wire_lib'
-import * as mobx from 'mobx'
-// @ts-ignore
-import * as solid from 'solid-js/dist/solid.cjs'
-import S, { DataSignal } from 's-js'
-import * as frpts from '@frp-ts/core'
-import * as usignal from 'usignal'
-import * as preact from '@preact/signals-core'
-import {
-  createAction,
-  createReducer,
-  createSelector,
-  on,
-  props,
-  Store,
-} from '@ngrx/store'
+// TODO move to test source
+import type { Source as WSource } from 'wonka'
 
-import * as v3 from '@reatom/core'
+type Rec<T = any> = Record<string, T>
 
-const { $mol_wire_atom } = mol_wire_lib
+type UpdateLeaf = (value: number) => void
 
-mobx.configure({ enforceActions: 'never' })
+type Setup = (listener: (computedValue: number) => void) => Promise<UpdateLeaf>
 
-async function testComputed(iterations: number) {
-  const w_combine = <A, B>(
-    sourceA: w.Source<A>,
-    sourceB: w.Source<B>,
-  ): w.Source<[A, B]> => {
-    const source = w.combine(sourceA, sourceB)
-    // return source
-    return w.pipe(source, w.sample(source))
-  }
+// There is a few tests skipped
+// coz I don't know how to turn off their batching
+// which delays computations
 
-  const aV3 = v3.atom(0)
+const testComputers = setupComputersTest({
+  async 'skip cellx'(listener) {
+    const { cellx } = await import('cellx')
 
-  const bV3 = v3.atom((ctx) => ctx.spy(aV3) + 1)
-  const cV3 = v3.atom((ctx) => ctx.spy(aV3) + 1)
-  const dV3 = v3.atom((ctx) => ctx.spy(bV3) + ctx.spy(cV3))
-  const eV3 = v3.atom((ctx) => ctx.spy(dV3) + 1)
-  const fV3 = v3.atom((ctx) => ctx.spy(dV3) + ctx.spy(eV3))
-  const gV3 = v3.atom((ctx) => ctx.spy(dV3) + ctx.spy(eV3))
-  const hV3 = v3.atom((ctx) => ctx.spy(fV3) + ctx.spy(gV3))
+    const entry = cellx(0)
+    const a = cellx(() => entry())
+    const b = cellx(() => a() + 1)
+    const c = cellx(() => a() + 1)
+    const d = cellx(() => b() + c())
+    const e = cellx(() => d() + 1)
+    const f = cellx(() => d() + e())
+    const g = cellx(() => d() + e())
+    const h = cellx(() => f() + g())
 
-  const ctxV3 = v3.createCtx()
-  let resV3 = 0
-  ctxV3.subscribe(hV3, (v) => {
-    resV3 += v //?
-  })
-  resV3 = 0
+    listener(h())
 
-  const eEntry = effector.createEvent<number>()
-  const eA = effector.createStore(0).on(eEntry, (state, v) => v)
-  const eB = eA.map((a) => a + 1)
-  const eC = eA.map((a) => a + 1)
-  const eD = effector.combine(eB, eC, (b, c) => b + c)
-  const eE = eD.map((d) => d + 1)
-  const eF = effector.combine(eD, eE, (d, e) => d + e)
-  const eG = effector.combine(eD, eE, (d, e) => d + e)
-  const eH = effector.combine(eF, eG, (h1, h2) => h1 + h2)
+    return (i) => {
+      entry(i)
+      // this is wrong
+      // manual pull could help to skip a computations
+      // needed to notification walk
+      listener(h())
+    }
+  },
+  async effector(listener) {
+    const { createEvent, createStore, combine } = await import('effector')
 
-  let eRes = 0
+    const entry = createEvent<number>()
+    const a = createStore(0).on(entry, (state, v) => v)
+    const b = a.map((a) => a + 1)
+    const c = a.map((a) => a + 1)
+    const d = combine(b, c, (b, c) => b + c)
+    const e = d.map((d) => d + 1)
+    const f = combine(d, e, (d, e) => d + e)
+    const g = combine(d, e, (d, e) => d + e)
+    const h = combine(f, g, (h1, h2) => h1 + h2)
 
-  // // Effector graphs are hot, so all calculations will be performed on each event
-  // // `getState` will be enough
-  // eH.subscribe((v) => {
-  //   eRes += v
-  // })
-  eRes = 0
+    h.subscribe(listener)
 
-  const eScope = effector.fork()
-  let eScopeRes = 0
+    return (i) => entry(i)
+  },
+  async 'effector (fork)'(listener) {
+    const { createEvent, createStore, combine, allSettled, fork } =
+      await import('effector')
 
-  const wEntry = w.makeSubject<number>()
-  const wA = w.pipe(
-    wEntry.source,
-    w.map((v) => v),
-  )
-  const wB = w.pipe(
-    wA,
-    w.map((v) => v + 1),
-  )
-  const wC = w.pipe(
-    wA,
-    w.map((v) => v + 1),
-  )
-  const wD = w.pipe(
-    w_combine(wB, wC),
-    w.map(([b, c]) => b + c),
-  )
-  const wE = w.pipe(
-    wD,
-    w.map((v) => v + 1),
-  )
-  const wF = w.pipe(
-    w_combine(wD, wE),
-    w.map(([d, e]) => d + e),
-  )
-  const wG = w.pipe(
-    w_combine(wD, wE),
-    w.map(([d, e]) => d + e),
-  )
-  const wH = w.pipe(
-    w_combine(wF, wG),
-    w.map(([h1, h2]) => h1 + h2),
-  )
-  let wRes = 0
-  w.pipe(
-    wH,
-    w.subscribe((v) => {
-      wRes += v
-    }),
-  )
-  wRes = 0
+    const entry = createEvent<number>()
+    const a = createStore(0).on(entry, (state, v) => v)
+    const b = a.map((a) => a + 1)
+    const c = a.map((a) => a + 1)
+    const d = combine(b, c, (b, c) => b + c)
+    const e = d.map((d) => d + 1)
+    const f = combine(d, e, (d, e) => d + e)
+    const g = combine(d, e, (d, e) => d + e)
+    const h = combine(f, g, (h1, h2) => h1 + h2)
 
-  const frptsEntry = frpts.newAtom(0)
-  const frptsA = frpts.combine(frptsEntry, (v) => v)
-  const frptsB = frpts.combine(frptsA, (a) => a + 1)
-  const frptsC = frpts.combine(frptsA, (a) => a + 1)
-  const frptsD = frpts.combine(frptsB, frptsC, (b, c) => b + c)
-  const frptsE = frpts.combine(frptsD, (d) => d + 1)
-  const frptsF = frpts.combine(frptsD, frptsE, (d, e) => d + e)
-  const frptsG = frpts.combine(frptsD, frptsE, (d, e) => d + e)
-  const frptsH = frpts.combine(frptsF, frptsG, (f, g) => f + g)
-  let frptsRes = 0
+    const scope = fork()
 
-  const cEntry = cellx(0)
-  const cA = cellx(() => cEntry())
-  const cB = cellx(() => cA() + 1)
-  const cC = cellx(() => cA() + 1)
-  const cD = cellx(() => cB() + cC())
-  const cE = cellx(() => cD() + 1)
-  const cF = cellx(() => cD() + cE())
-  const cG = cellx(() => cD() + cE())
-  const cH = cellx(() => cF() + cG())
-  cH()
-  let cRes = 0
+    return (i) => {
+      allSettled(entry, { scope, params: i })
+      // this is not wrong
+      // coz effector graph a hot always
+      // and `getState` is doing nothing here
+      // only internal state reading
+      listener(scope.getState(h))
+    }
+  },
+  async 'skip frpts'(listener) {
+    const { newAtom, combine } = await import('@frp-ts/core')
 
-  const mEntry = new $mol_wire_atom('mEntry', (next: number = 0) => next)
-  const mA = new $mol_wire_atom('mA', () => mEntry.sync())
-  const mB = new $mol_wire_atom('mB', () => mA.sync() + 1)
-  const mC = new $mol_wire_atom('mC', () => mA.sync() + 1)
-  const mD = new $mol_wire_atom('mD', () => mB.sync() + mC.sync())
-  const mE = new $mol_wire_atom('mE', () => mD.sync() + 1)
-  const mF = new $mol_wire_atom('mF', () => mD.sync() + mE.sync())
-  const mG = new $mol_wire_atom('mG', () => mD.sync() + mE.sync())
-  const mH = new $mol_wire_atom('mH', () => mF.sync() + mG.sync())
-  mH.sync()
-  let mRes = 0
+    const entry = newAtom(0)
+    const a = combine(entry, (v) => v)
+    const b = combine(a, (a) => a + 1)
+    const c = combine(a, (a) => a + 1)
+    const d = combine(b, c, (b, c) => b + c)
+    const e = combine(d, (d) => d + 1)
+    const f = combine(d, e, (d, e) => d + e)
+    const g = combine(d, e, (d, e) => d + e)
+    const h = combine(f, g, (f, g) => f + g)
 
-  const xEntry = mobx.observable.box(0)
-  const xA = mobx.computed(() => xEntry.get())
-  const xB = mobx.computed(() => xA.get() + 1)
-  const xC = mobx.computed(() => xA.get() + 1)
-  const xD = mobx.computed(() => xB.get() + xC.get())
-  const xE = mobx.computed(() => xD.get() + 1)
-  const xF = mobx.computed(() => xD.get() + xE.get())
-  const xG = mobx.computed(() => xD.get() + xE.get())
-  const xH = mobx.computed(() => xF.get() + xG.get())
-  let xRes = 0
-  mobx.autorun(() => (xRes += xH.get()))
-  xRes = 0
+    listener(h.get())
 
-  const xProxy = mobx.makeAutoObservable({
-    entry: 0,
-    get a() {
-      return this.entry
-    },
-    get b() {
-      return this.a + 1
-    },
-    get c() {
-      return this.a + 1
-    },
-    get d() {
-      return this.b + this.c
-    },
-    get e() {
-      return this.d + 1
-    },
-    get f() {
-      return this.d + this.e
-    },
-    get g() {
-      return this.d + this.e
-    },
-    get h() {
-      return this.f + this.g
-    },
-  })
-  let xpRes = 0
-  mobx.autorun(() => (xpRes += xProxy.h))
-  xpRes = 0
+    return (i) => {
+      entry.set(i)
+      // this is wrong
+      // manual pull could help to skip a computations
+      // needed to notification walk
+      listener(h.get())
+    }
+  },
+  async mobx(listener) {
+    const { makeAutoObservable, autorun, configure } = await import('mobx')
 
-  const [solidEntry, solidSet] = solid.createSignal(0)
-  const solidA = solid.createMemo(() => solidEntry())
-  const solidB = solid.createMemo(() => solidA() + 1)
-  const solidC = solid.createMemo(() => solidA() + 1)
-  const solidD = solid.createMemo(() => solidB() + solidC())
-  const solidE = solid.createMemo(() => solidD() + 1)
-  const solidF = solid.createMemo(() => solidD() + solidE())
-  const solidG = solid.createMemo(() => solidD() + solidE())
-  const solidH = solid.createMemo(() => solidF() + solidG())
-  let solidRes = 0
-  solid.createEffect(() => (solidRes += solidH()))
-  solidRes = 0
+    configure({ enforceActions: 'never' })
 
-  let sRes = 0
-  let sEntry: DataSignal<number>
-  S.root(() => {
-    sEntry = S.data(0)
-    const sA = S(() => sEntry())
-    const sB = S(() => sA() + 1)
-    const sC = S(() => sA() + 1)
-    const sD = S(() => sB() + sC())
-    const sE = S(() => sD() + 1)
-    const sF = S(() => sD() + sE())
-    const sG = S(() => sD() + sE())
-    const sH = S(() => sF() + sG())
-    S(() => (sRes += sH()))
-  })
-  sRes = 0
-
-  const uEntry = usignal.signal(0)
-  const uA = usignal.computed(() => uEntry.value)
-  const uB = usignal.computed(() => uA.value + 1)
-  const uC = usignal.computed(() => uA.value + 1)
-  const uD = usignal.computed(() => uB.value + uC.value)
-  const uE = usignal.computed(() => uD.value + 1)
-  const uF = usignal.computed(() => uD.value + uE.value)
-  const uG = usignal.computed(() => uD.value + uE.value)
-  const uH = usignal.computed(() => uF.value + uG.value)
-  let uRes = 0
-  usignal.effect(() => (uRes += uH.value))
-  uRes = 0
-
-  const pEntry = preact.signal(0)
-  const pA = preact.computed(() => pEntry.value)
-  const pB = preact.computed(() => pA.value + 1)
-  const pC = preact.computed(() => pA.value + 1)
-  const pD = preact.computed(() => pB.value + pC.value)
-  const pE = preact.computed(() => pD.value + 1)
-  const pF = preact.computed(() => pD.value + pE.value)
-  const pG = preact.computed(() => pD.value + pE.value)
-  const pH = preact.computed(() => pF.value + pG.value)
-  let pRes = 0
-  preact.effect(() => (pRes += pH.value))
-  pRes = 0
-
-  // const nEntry = createAction('entry', props<{ payload: number }>())
-  // const nA = createReducer(
-  //   0,
-  //   on(nEntry, (state, { payload }) => payload),
-  // )
-  // const nB = createSelector(
-  //   ({ entry }: { entry: number }) => entry,
-  //   (v) => v + 1,
-  // )
-  // const nC = createSelector(nB, (v) => v + 1)
-  // const nD = createSelector([nB, nC], (b, c) => b + c)
-  // const nE = createSelector(nD, (v) => v + 1)
-  // const nF = createSelector([nD, nE], (d, e) => d + e)
-  // const nG = createSelector([nD, nE], (d, e) => d + e)
-  // const nH = createSelector([nF, nG], (f, g) => f + g)
-  // const nStore = new Store({ entry: 0 }, nEntry, nA)
-  // let nRes = 0
-  // nStore.subscribe(nH, (value) => (nRes = value))
-  // nRes = 0
-
-  const reatomV3Logs = new Array<number>()
-  const effectorLogs = new Array<number>()
-  const effectorScopeLogs = new Array<number>()
-  const solidLogs = new Array<number>()
-  const sLogs = new Array<number>()
-  const wonkaLogs = new Array<number>()
-  const frptsLogs = new Array<number>()
-  const cellxLogs = new Array<number>()
-  const molLogs = new Array<number>()
-  const mobxLogs = new Array<number>()
-  const mobxProxyLogs = new Array<number>()
-  const usignalLogs = new Array<number>()
-  const preactLogs = new Array<number>()
-
-  var i = 0
-  while (i++ < iterations) {
-    const startReatomV3 = performance.now()
-    aV3(ctxV3, i)
-    reatomV3Logs.push(performance.now() - startReatomV3)
-
-    const startEffector = performance.now()
-    eEntry(i)
-    eRes += eH.getState()
-    effectorLogs.push(performance.now() - startEffector)
-
-    const startEffectorScope = performance.now()
-    effector.allSettled(eEntry, { scope: eScope, params: i })
-    eScopeRes += eScope.getState(eH)
-    effectorScopeLogs.push(performance.now() - startEffectorScope)
-
-    const startSolid = performance.now()
-    solidSet(i)
-    solidLogs.push(performance.now() - startSolid)
-
-    const sSolid = performance.now()
-    sEntry!(i)
-    sLogs.push(performance.now() - sSolid)
-
-    const startWonka = performance.now()
-    wEntry.next(i)
-    wonkaLogs.push(performance.now() - startWonka)
-
-    const startFrpts = performance.now()
-    frptsEntry.set(i)
-    frptsRes += frptsH.get()
-    frptsLogs.push(performance.now() - startFrpts)
-
-    const startCellx = performance.now()
-    cEntry(i)
-    cRes += cH()
-    cellxLogs.push(performance.now() - startCellx)
-
-    const startMol = performance.now()
-    mEntry.put(i)
-    mRes += mH.sync()
-    molLogs.push(performance.now() - startMol)
-
-    const startMobx = performance.now()
-    xEntry.set(i)
-    mobxLogs.push(performance.now() - startMobx)
-
-    const startMobxProxy = performance.now()
-    xProxy.entry = i
-    mobxProxyLogs.push(performance.now() - startMobxProxy)
-
-    const startUsignal = performance.now()
-    uEntry.value = i
-    usignalLogs.push(performance.now() - startUsignal)
-
-    const preactUsignal = performance.now()
-    pEntry.value = i
-    preactLogs.push(performance.now() - preactUsignal)
-
-    await new Promise((resolve) => setTimeout(resolve, 0))
-  }
-
-  console.log(`Median on one call in ms from ${iterations} iterations`)
-
-  if (
-    new Set([
-      resV3,
-      eRes,
-      eScopeRes,
-      solidRes,
-      sRes,
-      wRes,
-      frptsRes,
-      cRes,
-      mRes,
-      xRes,
-      xpRes,
-      uRes,
-      pRes,
-    ]).size !== 1
-  ) {
-    console.log(`ERROR!`)
-    console.error(`Results is not equal`)
-    console.log({
-      resV3,
-      eRes,
-      eScopeRes,
-      solidRes,
-      sRes,
-      wRes,
-      frptsRes,
-      cRes,
-      mRes,
-      xRes,
-      xpRes,
-      uRes,
-      pRes,
+    const proxy = makeAutoObservable({
+      entry: 0,
+      get a() {
+        return this.entry
+      },
+      get b() {
+        return this.a + 1
+      },
+      get c() {
+        return this.a + 1
+      },
+      get d() {
+        return this.b + this.c
+      },
+      get e() {
+        return this.d + 1
+      },
+      get f() {
+        return this.d + this.e
+      },
+      get g() {
+        return this.d + this.e
+      },
+      get h() {
+        return this.f + this.g
+      },
     })
+
+    autorun(() => listener(proxy.h))
+
+    return (i) => (proxy.entry = i)
+  },
+  async 'skip mol'(listener) {
+    const mol_wire_lib = await import('mol_wire_lib')
+    const { $mol_wire_atom } = mol_wire_lib
+
+    const entry = new $mol_wire_atom('entry', (next: number = 0) => next)
+    const a = new $mol_wire_atom('mA', () => entry.sync())
+    const b = new $mol_wire_atom('mB', () => a.sync() + 1)
+    const c = new $mol_wire_atom('mC', () => a.sync() + 1)
+    const d = new $mol_wire_atom('mD', () => b.sync() + c.sync())
+    const e = new $mol_wire_atom('mE', () => d.sync() + 1)
+    const f = new $mol_wire_atom('mF', () => d.sync() + e.sync())
+    const g = new $mol_wire_atom('mG', () => d.sync() + e.sync())
+    const h = new $mol_wire_atom('mH', () => f.sync() + g.sync())
+
+    listener(h.sync())
+
+    return (i) => {
+      entry.put(i)
+      // this is wrong
+      // manual pull could help to skip a computations
+      // needed to notification walk
+      listener(h.sync())
+    }
+  },
+  async preact(listener) {
+    const { signal, computed, effect } = await import('@preact/signals-core')
+
+    const entry = signal(0)
+    const a = computed(() => entry.value)
+    const b = computed(() => a.value + 1)
+    const c = computed(() => a.value + 1)
+    const d = computed(() => b.value + c.value)
+    const e = computed(() => d.value + 1)
+    const f = computed(() => d.value + e.value)
+    const g = computed(() => d.value + e.value)
+    const h = computed(() => f.value + g.value)
+
+    effect(() => listener(h.value))
+
+    return (i) => (entry.value = i)
+  },
+  async reatom(listener) {
+    const { atom, createCtx } = await import('@reatom/core')
+    const a = atom(0)
+    const b = atom((ctx) => ctx.spy(a) + 1)
+    const c = atom((ctx) => ctx.spy(a) + 1)
+    const d = atom((ctx) => ctx.spy(b) + ctx.spy(c))
+    const e = atom((ctx) => ctx.spy(d) + 1)
+    const f = atom((ctx) => ctx.spy(d) + ctx.spy(e))
+    const g = atom((ctx) => ctx.spy(d) + ctx.spy(e))
+    const h = atom((ctx) => ctx.spy(f) + ctx.spy(g))
+
+    const ctx = createCtx()
+    ctx.subscribe(h, listener)
+
+    return (i) => a(ctx, i)
+  },
+  async solid(listener) {
+    const { createSignal, createMemo, createEffect } = await import(
+      // FIXME
+      // @ts-ignore
+      'solid-js/dist/solid.cjs'
+    )
+
+    const [entry, update] = createSignal(0)
+    const a = createMemo(() => entry())
+    const b = createMemo(() => a() + 1)
+    const c = createMemo(() => a() + 1)
+    const d = createMemo(() => b() + c())
+    const e = createMemo(() => d() + 1)
+    const f = createMemo(() => d() + e())
+    const g = createMemo(() => d() + e())
+    const h = createMemo(() => f() + g())
+
+    createEffect(() => listener(h()))
+
+    return (i) => update(i)
+  },
+  async 's.js'(listener) {
+    const { default: S } = await import('s-js')
+
+    const { entry, h } = S.root(() => {
+      const entry = S.data(0)
+      const a = S(() => entry())
+      const b = S(() => a() + 1)
+      const c = S(() => a() + 1)
+      const d = S(() => b() + c())
+      const e = S(() => d() + 1)
+      const f = S(() => d() + e())
+      const g = S(() => d() + e())
+      const h = S(() => f() + g())
+
+      return { entry, h }
+    })
+
+    S(() => listener(h()))
+
+    return (i) => entry(i)
+  },
+  async usignal(listener) {
+    const { signal, computed, effect } = await import('usignal')
+
+    const entry = signal(0)
+    const a = computed(() => entry.value)
+    const b = computed(() => a.value + 1)
+    const c = computed(() => a.value + 1)
+    const d = computed(() => b.value + c.value)
+    const e = computed(() => d.value + 1)
+    const f = computed(() => d.value + e.value)
+    const g = computed(() => d.value + e.value)
+    const h = computed(() => f.value + g.value)
+
+    effect(() => listener(h.value))
+
+    return (i) => (entry.value = i)
+  },
+  async wonka(listener) {
+    const { makeSubject, pipe, map, subscribe, combine, sample } = await import(
+      'wonka'
+    )
+
+    const ccombine = <A, B>(
+      sourceA: WSource<A>,
+      sourceB: WSource<B>,
+    ): WSource<[A, B]> => {
+      const source = combine(sourceA, sourceB)
+      // return source
+      return pipe(source, sample(source))
+    }
+
+    const entry = makeSubject<number>()
+    const a = pipe(
+      entry.source,
+      map((v) => v),
+    )
+    const b = pipe(
+      a,
+      map((v) => v + 1),
+    )
+    const c = pipe(
+      a,
+      map((v) => v + 1),
+    )
+    const d = pipe(
+      ccombine(b, c),
+      map(([b, c]) => b + c),
+    )
+    const e = pipe(
+      d,
+      map((v) => v + 1),
+    )
+    const f = pipe(
+      ccombine(d, e),
+      map(([d, e]) => d + e),
+    )
+    const g = pipe(
+      ccombine(d, e),
+      map(([d, e]) => d + e),
+    )
+    const h = pipe(
+      ccombine(f, g),
+      map(([h1, h2]) => h1 + h2),
+    )
+    pipe(h, subscribe(listener))
+
+    return (i) => entry.next(i)
+  },
+})
+
+function setupComputersTest(tests: Rec<Setup>) {
+  return async (iterations: number) => {
+    const testsList: Array<{
+      ref: { value: number }
+      update: UpdateLeaf
+      name: string
+      logs: Array<number>
+    }> = []
+
+    for (const name in tests) {
+      if (name.startsWith('skip')) continue
+      const ref = { value: 0 }
+      const update = await tests[name]!((value) => (ref.value = value))
+      testsList.push({ ref, update, name, logs: [] })
+    }
+
+    let i = 0
+    while (i++ < iterations) {
+      for (const test of testsList) {
+        const start = performance.now()
+        test.update(i)
+        test.logs.push(performance.now() - start)
+      }
+
+      if (new Set(testsList.map((test) => test.ref.value)).size !== 1) {
+        console.log(`ERROR!`)
+        console.error(`Results is not equal (iteration №${i})`)
+        console.log(
+          testsList.reduce(
+            (acc, test) => ((acc[test.name] = test.ref.value), acc),
+            {} as Rec<number>,
+          ),
+        )
+        return
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    }
+
+    console.log(`Median on one call in ms from ${iterations} iterations`)
+
+    printLogs(
+      testsList.reduce(
+        (acc, { name, logs }) => ((acc[name] = log(logs)), acc),
+        {} as Rec<any>,
+      ),
+    )
   }
-
-  printLogs({
-    reatom3: log(reatomV3Logs),
-    effector: log(effectorLogs),
-    $mol_wire: log(molLogs),
-    effectorScope: log(effectorScopeLogs),
-    solid: log(solidLogs),
-    s: log(sLogs),
-    cellx: log(cellxLogs),
-    wonka: log(wonkaLogs),
-    frpts: log(frptsLogs),
-    mobx: log(mobxLogs),
-    mobxProxy: log(mobxProxyLogs),
-    usignal: log(usignalLogs),
-    preact: log(preactLogs),
-  })
-}
-
-async function testAggregateGrowing(count: number) {
-  const molAtoms = [new $mol_wire_atom(`0`, (next: number = 0) => next)]
-  const reAtoms = [v3.atom(0, `${0}`)]
-  const mobxAtoms = [mobx.observable.box(0, { name: `${0}` })]
-
-  const molAtom = new $mol_wire_atom(`sum`, () =>
-    molAtoms.reduce((sum, atom) => sum + atom.sync(), 0),
-  )
-  const reAtom = v3.atom(
-    (ctx) => reAtoms.reduce((sum, atom) => sum + ctx.spy(atom), 0),
-    `sum`,
-  )
-  const mobxAtom = mobx.computed(
-    () => mobxAtoms.reduce((sum, atom) => sum + atom.get(), 0),
-    { name: `sum` },
-  )
-  const ctx = v3.createCtx()
-
-  ctx.subscribe(reAtom, () => {})
-  molAtom.sync()
-  mobx.autorun(() => mobxAtom.get())
-
-  const reatomLogs = new Array<number>()
-  const molLogs = new Array<number>()
-  const mobxLogs = new Array<number>()
-  let i = 1
-  while (i++ < count) {
-    const startReatom = performance.now()
-    reAtoms.push(v3.atom(i, `${i}`))
-    reAtoms.at(-2)!(ctx, i)
-    reatomLogs.push(performance.now() - startReatom)
-
-    const startMol = performance.now()
-    molAtoms.push(new $mol_wire_atom(`${i}`, (next: number = i) => next))
-    molAtoms.at(-2)!.put(i)
-    molAtom.sync()
-    molLogs.push(performance.now() - startMol)
-
-    const startMobx = performance.now()
-    mobxAtoms.push(mobx.observable.box(i, { name: `${i}` }))
-    mobxAtoms.at(-2)!.set(i)
-    mobxLogs.push(performance.now() - startMobx)
-
-    await new Promise((resolve) => setTimeout(resolve, 0))
-  }
-
-  if (new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get()]).size > 1) {
-    throw new Error(`Mismatch: ${molAtom.sync()} !== ${ctx.get(reAtom)}`)
-  }
-
-  console.log(`Median of sum calc of reactive nodes in list from 1 to ${count}`)
-
-  printLogs({
-    reatom: log(reatomLogs),
-    $mol_wire: log(molLogs),
-    mobx: log(mobxLogs),
-  })
-}
-
-async function testAggregateShrinking(count: number) {
-  const molAtoms = Array.from(
-    { length: 1000 },
-    (_, i) => new $mol_wire_atom(`${i}`, (next: number = 0) => next),
-  )
-  const reAtoms = Array.from({ length: 1000 }, (_, i) => v3.atom(0, `${i}`))
-
-  const molAtom = new $mol_wire_atom(`sum`, () =>
-    molAtoms.reduce((sum, atom) => sum + atom.sync(), 0),
-  )
-  const reAtom = v3.atom(
-    (ctx) => reAtoms.reduce((sum, atom) => sum + ctx.spy(atom), 0),
-    `sum`,
-  )
-  const ctx = v3.createCtx()
-
-  ctx.subscribe(reAtom, () => {})
-  molAtom.sync()
-
-  const reatomLogs = new Array<number>()
-  const molLogs = new Array<number>()
-  let i = 1
-  while (i++ < count) {
-    const startReatom = performance.now()
-    reAtoms.pop()!(ctx, i)
-    reatomLogs.push(performance.now() - startReatom)
-
-    const startMol = performance.now()
-    molAtoms.pop()!.put(i)
-    molAtom.sync()
-    molLogs.push(performance.now() - startMol)
-
-    await new Promise((resolve) => setTimeout(resolve, 0))
-  }
-
-  if (molAtom.sync() !== ctx.get(reAtom)) {
-    throw new Error(`Mismatch: ${molAtom.sync()} !== ${ctx.get(reAtom)}`)
-  }
-
-  console.log(`Median of sum calc of reactive nodes in list from ${count} to 1`)
-
-  printLogs({
-    reatom: log(reatomLogs),
-    $mol_wire: log(molLogs),
-  })
 }
 
 test()
 async function test() {
   await Promise.all([
-    testComputed(10),
-    testComputed(100),
-    testComputed(1_000),
-    testComputed(10_000),
+    testComputers(10),
+    testComputers(100),
+    testComputers(1_000),
+    testComputers(10_000),
   ])
-
-  await Promise.all([testAggregateGrowing(1000), testAggregateShrinking(1000)])
 
   process.exit()
 }
 
-function printLogs(results: v3.Rec<ReturnType<typeof log>>) {
+function printLogs(results: Rec<ReturnType<typeof log>>) {
   const medFastest = Math.min(...Object.values(results).map(({ med }) => med))
 
   const tabledData = Object.entries(results)
@@ -535,7 +383,7 @@ function printLogs(results: v3.Rec<ReturnType<typeof log>>) {
         'max ms': max.toFixed(5),
       }
       return acc
-    }, {} as v3.Rec<v3.Rec>)
+    }, {} as Rec<Rec>)
 
   console.table(tabledData)
 }

@@ -1,10 +1,6 @@
 This benchmark measured computation of complex computed reactive unit when it deep children change.
 
-## Contribution
-
-Just select a test with familiar API with your own library, copy it, modify it, don't forget to add your results to correctness test (`new Set` check).
-
-## Results
+## Results (outdated)
 
 ### Apple m1
 
