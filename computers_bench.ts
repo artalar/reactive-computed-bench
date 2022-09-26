@@ -162,6 +162,7 @@ const testComputers = setupComputersTest({
 
     return (i) => (proxy.entry = i)
   },
+  // TODO `TypeError: $mol_wire_atom is not a constructor`
   async 'skip mol'({ listener, startCreation, endCreation }) {
     const mol_wire_lib = await import('mol_wire_lib')
     const { $mol_wire_atom } = mol_wire_lib
@@ -184,9 +185,7 @@ const testComputers = setupComputersTest({
 
     return (i) => {
       entry.put(i)
-      // this is wrong
-      // manual pull could help to skip a computations
-      // needed to notification walk
+      // the batch doing the same https://github.com/hyoo-ru/mam_mol/blob/c9cf0faf966c8bb3d0e76339527ef03e03d273e8/wire/fiber/fiber.ts#L31
       listener(h.sync())
     }
   },
