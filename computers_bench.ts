@@ -303,6 +303,27 @@ const testComputers = setupComputersTest({
 
     return (i) => (entry.value = i)
   },
+  async whatsup({ listener, startCreation, endCreation }) {
+    const { observable, computed, autorun } = await import('whatsup')
+
+    startCreation()
+
+    const entry = observable(0)
+    const a = computed(() => entry())
+    const b = computed(() => a() + 1)
+    const c = computed(() => a() + 1)
+    const d = computed(() => b() + c())
+    const e = computed(() => d() + 1)
+    const f = computed(() => d() + e())
+    const g = computed(() => d() + e())
+    const h = computed(() => f() + g())
+
+    autorun(() => listener(h()))
+
+    endCreation()
+
+    return (i) => entry(i)
+  },
   async wonka({ listener, startCreation, endCreation }) {
     const { makeSubject, pipe, map, subscribe, combine, sample } = await import(
       'wonka'
