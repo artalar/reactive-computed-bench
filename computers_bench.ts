@@ -91,7 +91,7 @@ const testComputers = setupComputersTest({
       listener(scope.getState(h))
     }
   },
-  async 'skip frpts'({ listener, startCreation, endCreation }) {
+  async frpts({ listener, startCreation, endCreation }) {
     const { newAtom, combine } = await import('@frp-ts/core')
 
     startCreation()
@@ -106,17 +106,11 @@ const testComputers = setupComputersTest({
     const g = combine(d, e, (d, e) => d + e)
     const h = combine(f, g, (f, g) => f + g)
 
-    listener(h.get())
+    h.subscribe({ next: () => listener(h.get()) })
 
     endCreation()
 
-    return (i) => {
-      entry.set(i)
-      // this is wrong
-      // manual pull could help to skip a computations
-      // needed to notification walk
-      listener(h.get())
-    }
+    return (i) => entry.set(i)
   },
   async mobx({ listener, startCreation, endCreation }) {
     const { makeAutoObservable, autorun, configure } = await import('mobx')
@@ -388,8 +382,6 @@ function setupComputersTest(tests: Rec<Setup>) {
     }> = []
 
     for (const name in tests) {
-      if (name.startsWith('skip')) continue
-
       const ref = { value: 0 }
       const creationLogs: Array<number> = []
       let update: UpdateLeaf
