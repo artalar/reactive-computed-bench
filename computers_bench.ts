@@ -384,6 +384,7 @@ function setupComputersTest(tests: Rec<Setup>) {
       name: string
       creationLogs: Array<number>
       updateLogs: Array<number>
+      memLogs: Array<number>
     }> = []
 
     for (const name in tests) {
@@ -415,6 +416,7 @@ function setupComputersTest(tests: Rec<Setup>) {
         name,
         creationLogs,
         updateLogs: [],
+        memLogs: [],
       })
     }
 
@@ -436,9 +438,15 @@ function setupComputersTest(tests: Rec<Setup>) {
     let i = 0
     while (i++ < iterations) {
       for (const test of testsList) {
+        globalThis.gc?.()
+        globalThis.gc?.()
+        let mem = process.memoryUsage().heapUsed
+
         const start = performance.now()
         test.update(i)
         test.updateLogs.push(performance.now() - start)
+
+        test.memLogs.push(process.memoryUsage().heapUsed - mem)
       }
 
       if (new Set(testsList.map((test) => test.ref.value)).size !== 1) {
@@ -455,8 +463,7 @@ function setupComputersTest(tests: Rec<Setup>) {
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
 
-    console.log(`Median on one call in ms from ${iterations} iterations`)
-
+    console.log(`Median of update duration from ${iterations} iterations`)
     printLogs(
       testsList.reduce(
         (acc, { name, updateLogs }) => (
@@ -465,15 +472,28 @@ function setupComputersTest(tests: Rec<Setup>) {
         {} as Rec<any>,
       ),
     )
+
+    if (globalThis.gc) {
+      console.log(`Median of "heapUsed" from ${iterations} iterations`)
+      printLogs(
+        testsList.reduce(
+          (acc, { name, memLogs }) => ((acc[name] = formatLog(memLogs)), acc),
+          {} as Rec<any>,
+        ),
+      )
+    }
   }
 }
 
 test()
 async function test() {
-  await testComputers(10, 5)
-  await testComputers(100, 0)
-  await testComputers(1_000, 0)
-  await testComputers(10_000, 0)
-
+  if (globalThis.gc) {
+    await testComputers(300, 0)
+  } else {
+    await testComputers(10, 5)
+    await testComputers(100, 0)
+    await testComputers(1_000, 0)
+    await testComputers(10_000, 0)
+  }
   process.exit()
 }
