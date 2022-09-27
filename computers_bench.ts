@@ -17,8 +17,8 @@ type Setup = (hooks: {
 // which delays computations
 
 const testComputers = setupComputersTest({
-  async 'skip cellx'({ listener, startCreation, endCreation }) {
-    const { cellx } = await import('cellx')
+  async cellx({ listener, startCreation, endCreation }) {
+    const { cellx, Cell } = await import('cellx')
 
     startCreation()
 
@@ -32,16 +32,13 @@ const testComputers = setupComputersTest({
     const g = cellx(() => d() + e())
     const h = cellx(() => f() + g())
 
-    listener(h())
+    h.subscribe((err, v) => listener(h()))
 
     endCreation()
 
     return (i) => {
       entry(i)
-      // this is wrong
-      // manual pull could help to skip a computations
-      // needed to notification walk
-      listener(h())
+      Cell.release()
     }
   },
   async effector({ listener, startCreation, endCreation }) {
@@ -162,10 +159,9 @@ const testComputers = setupComputersTest({
 
     return (i) => (proxy.entry = i)
   },
-  // TODO `TypeError: $mol_wire_atom is not a constructor`
-  async 'skip mol'({ listener, startCreation, endCreation }) {
+  async mol({ listener, startCreation, endCreation }) {
     const mol_wire_lib = await import('mol_wire_lib')
-    const { $mol_wire_atom } = mol_wire_lib
+    const { $mol_wire_atom } = mol_wire_lib.default
 
     startCreation()
 
