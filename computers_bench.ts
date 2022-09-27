@@ -162,10 +162,9 @@ const testComputers = setupComputersTest({
 
     return (i) => (proxy.entry = i)
   },
-  // TODO `TypeError: $mol_wire_atom is not a constructor`
-  async 'skip mol'({ listener, startCreation, endCreation }) {
+  async 'mol'({ listener, startCreation, endCreation }) {
     const mol_wire_lib = await import('mol_wire_lib')
-    const { $mol_wire_atom } = mol_wire_lib
+    const { $mol_wire_atom } = mol_wire_lib.default
 
     startCreation()
 
