@@ -368,6 +368,32 @@ const testComputers = setupComputersTest({
 
     return (i) => entry.next(i)
   },
+  async chronograph({ listener, startCreation, endCreation }) {
+    const Box = (await import("@bryntum/chronograph/src/chrono2/data/Box.js")).Box
+    const CalculableBox = (await import("@bryntum/chronograph/src/chrono2/data/CalculableBox.js")).CalculableBox
+
+    const calc  = (calc : (...args: any[]) => any) => CalculableBox.new({ calculation : calc })
+
+    startCreation()
+
+    const entry = Box.new(0)
+    const a = calc(() => entry.read())
+    const b = calc(() => a.read() + 1)
+    const c = calc(() => a.read() + 1)
+    const d = calc(() => b.read() + c.read())
+    const e = calc(() => d.read() + 1)
+    const f = calc(() => d.read() + e.read())
+    const g = calc(() => d.read() + e.read())
+    const h = calc(() => f.read() + g.read())
+
+    endCreation()
+
+    return (i) => {
+      entry.write(i)
+
+      listener(h.read())
+    }
+  },
 })
 
 function setupComputersTest(tests: Rec<Setup>) {

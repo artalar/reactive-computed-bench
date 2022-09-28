@@ -39,7 +39,8 @@
     "usignal": "^0.7.15",
     "uvu": "^0.5.6",
     "whatsup": "^2.3.12",
-    "wonka": "^6.0.0"
+    "wonka": "^6.0.0",
+    "@bryntum/chronograph": "^2.0.3"
   },
   "keywords": [
     "reactive",
