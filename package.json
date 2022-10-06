@@ -4,7 +4,9 @@
   "description": "Benchmarks of complex computed update performance",
   "scripts": {
     "start": "tsx computers_bench.ts",
-    "start:mem": "node --expose-gc --loader=tsx computers_bench.ts"
+    "start:mem": "node --expose-gc --loader=tsx computers_bench.ts",
+    "site:dev": "vite dev",
+    "site:build": "vite build"
   },
   "author": "artalar",
   "license": "MIT",
@@ -38,6 +40,7 @@
     "typescript": "^4.8.2",
     "usignal": "^0.7.15",
     "uvu": "^0.5.6",
+    "vite": "^3.1.4",
     "whatsup": "^2.3.12",
     "wonka": "^6.0.0"
   },

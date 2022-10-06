@@ -1,4 +1,3 @@
-import { performance } from 'perf_hooks'
 // TODO move to test source
 import type { Source as WSource } from 'wonka'
 
@@ -432,13 +431,13 @@ function setupComputersTest(tests: Rec<Setup>) {
       for (const test of testsList) {
         globalThis.gc?.()
         globalThis.gc?.()
-        let mem = process.memoryUsage().heapUsed
+        let mem = globalThis.process?.memoryUsage?.().heapUsed
 
         const start = performance.now()
         test.update(i)
         test.updateLogs.push(performance.now() - start)
 
-        test.memLogs.push(process.memoryUsage().heapUsed - mem)
+        if (mem) test.memLogs.push(process.memoryUsage().heapUsed - mem)
       }
 
       if (new Set(testsList.map((test) => test.ref.value)).size !== 1) {
@@ -477,15 +476,17 @@ function setupComputersTest(tests: Rec<Setup>) {
   }
 }
 
-test()
-async function test() {
-  if (globalThis.gc) {
-    await testComputers(300, 0)
-  } else {
-    await testComputers(10, 5)
-    await testComputers(100, 0)
-    await testComputers(1_000, 0)
-    await testComputers(10_000, 0)
-  }
-  process.exit()
+export async function test() {
+  await testComputers(10, 5)
+  await testComputers(100, 0)
+  await testComputers(1_000, 0)
+  await testComputers(10_000, 0)
+}
+
+if (globalThis.process) {
+  import('perf_hooks')
+    // @ts-expect-error
+    .then(({ performance }) => (globalThis.performance = performance))
+    .then(() => (globalThis.gc ? testComputers(300, 0) : test()))
+    .then(() => process.exit())
 }
