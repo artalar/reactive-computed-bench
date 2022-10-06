@@ -238,11 +238,15 @@ const testComputers = setupComputersTest({
     return (i) => (entry.value = i)
   },
   async reatom({ listener, startCreation, endCreation }) {
-    const { atom, createCtx } = await import('@reatom/core')
+    const { action, atom, createCtx } = await import('@reatom/core')
 
     startCreation()
 
-    const a = atom(0)
+    const entry = action<number>()
+    const a = atom((ctx, state = 0) => {
+      ctx.spy(entry).forEach((v) => (state = v))
+      return state
+    })
     const b = atom((ctx) => ctx.spy(a) + 1)
     const c = atom((ctx) => ctx.spy(a) + 1)
     const d = atom((ctx) => ctx.spy(b) + ctx.spy(c))
@@ -256,7 +260,7 @@ const testComputers = setupComputersTest({
 
     endCreation()
 
-    return (i) => a(ctx, i)
+    return (i) => entry(ctx, i)
   },
   async solid({ listener, startCreation, endCreation }) {
     const { createSignal, createMemo, createEffect } = await import(
