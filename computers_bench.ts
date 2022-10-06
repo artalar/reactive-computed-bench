@@ -16,6 +16,44 @@ type Setup = (hooks: {
 // which delays computations
 
 const testComputers = setupComputersTest({
+  // async native({ listener, startCreation, endCreation }) {
+  //   startCreation()
+
+  //   const entry = (i = 0) => i
+  //   const a = (i: number) => entry(i)
+  //   const b = (i: number) => a(i) + 1
+  //   const c = (i: number) => a(i) + 1
+  //   const d = (i: number) => b(i) + c(i)
+  //   const e = (i: number) => d(i) + 1
+  //   const f = (i: number) => d(i) + e(i)
+  //   const g = (i: number) => d(i) + e(i)
+  //   const h = (i: number) => f(i) + g(i)
+
+  //   endCreation()
+
+  //   return (i) => listener(h(i))
+  // },
+  // async selector({ listener, startCreation, endCreation }) {
+  //   const createSelector = (cb: (input: any) => any) => {
+  //     let input: any, res: any
+  //     return (i: any) => (i === input ? res : (res = cb((input = i))))
+  //   }
+  //   startCreation()
+
+  //   const entry = createSelector((i = 0) => i)
+  //   const a = createSelector((i: number) => entry(i))
+  //   const b = createSelector((i: number) => a(i) + 1)
+  //   const c = createSelector((i: number) => a(i) + 1)
+  //   const d = createSelector((i: number) => b(i) + c(i))
+  //   const e = createSelector((i: number) => d(i) + 1)
+  //   const f = createSelector((i: number) => d(i) + e(i))
+  //   const g = createSelector((i: number) => d(i) + e(i))
+  //   const h = createSelector((i: number) => f(i) + g(i))
+
+  //   endCreation()
+
+  //   return (i) => listener(h(i))
+  // },
   async cellx({ listener, startCreation, endCreation }) {
     const { cellx, Cell } = await import('cellx')
 
