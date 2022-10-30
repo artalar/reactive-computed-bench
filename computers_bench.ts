@@ -54,6 +54,27 @@ const testComputers = setupComputersTest({
 
   //   return (i) => listener(h(i))
   // },
+  async spred({ listener, startCreation, endCreation }) {
+    const { writable, computed } = await import('spred');
+
+    startCreation();
+
+    const entry = writable(0);
+    const a = computed(() => entry());
+    const b = computed(() => a() + 1);
+    const c = computed(() => a() + 1);
+    const d = computed(() => b() + c());
+    const e = computed(() => d() + 1);
+    const f = computed(() => d() + e());
+    const g = computed(() => d() + e());
+    const h = computed(() => f() + g());
+
+    h.subscribe(listener);
+
+    endCreation();
+
+    return (i) => entry(i);
+  },
   async cellx({ listener, startCreation, endCreation }) {
     const { cellx, Cell } = await import('cellx')
 
