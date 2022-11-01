@@ -1,4 +1,4 @@
-<svg id="bench-chart" viewBox="0 0 830 620" xmlns="http://www.w3.org/2000/svg">
+<svg id="bench-chart" viewBox="0 0 830 580" xmlns="http://www.w3.org/2000/svg">
   <style>
     #bench-chart .grid {
       stroke: #777777;
