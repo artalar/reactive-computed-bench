@@ -1,5 +1,6 @@
 // TODO move to test source
 import type { Source as WSource } from 'wonka'
+import { genChart } from './chart_gen'
 
 import { Rec, formatLog, printLogs } from './utils'
 
@@ -518,14 +519,15 @@ function setupComputersTest(tests: Rec<Setup>) {
     }
 
     console.log(`Median of update duration from ${iterations} iterations`)
-    printLogs(
-      testsList.reduce(
-        (acc, { name, updateLogs }) => (
-          (acc[name] = formatLog(updateLogs)), acc
-        ),
-        {} as Rec<any>,
+
+    const results = testsList.reduce(
+      (acc, { name, updateLogs }) => (
+        (acc[name] = formatLog(updateLogs)), acc
       ),
-    )
+      {} as Rec<any>,
+    );
+
+    printLogs(results);
 
     if (globalThis.gc) {
       console.log(`Median of "heapUsed" from ${iterations} iterations`)
@@ -536,14 +538,20 @@ function setupComputersTest(tests: Rec<Setup>) {
         ),
       )
     }
+
+    return results;
   }
 }
 
 export async function test() {
-  await testComputers(10, 5)
-  await testComputers(100, 0)
-  await testComputers(1_000, 0)
-  await testComputers(10_000, 0)
+  const results = {
+    10: await testComputers(10, 5),
+    100: await testComputers(100, 0),
+    1_000: await testComputers(1_000, 0),
+    10_000: await testComputers(10_000, 0)
+  }
+
+  genChart(results)
 }
 
 if (globalThis.process) {
