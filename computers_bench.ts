@@ -551,7 +551,7 @@ export async function test() {
     10_000: await testComputers(10_000, 0)
   }
 
-  genChart(results)
+  await genChart(results)
 }
 
 if (globalThis.process) {

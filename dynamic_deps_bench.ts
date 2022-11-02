@@ -1,13 +1,13 @@
 import { printLogs, formatLog } from './utils'
 
 async function testAggregateGrowing(count: number) {
-  const { observable, computed, autorun, configure } = await import('mobx')
-  configure({ enforceActions: 'never' })
-
   const mol_wire_lib = await import('mol_wire_lib')
-  const { $mol_wire_atom } = mol_wire_lib
+  const { $mol_wire_atom } = mol_wire_lib.default
 
   const { atom, createCtx } = await import('@reatom/core')
+
+  const { observable, computed, autorun, configure } = await import('mobx')
+  configure({ enforceActions: 'never' })
 
   const molAtoms = [new $mol_wire_atom(`0`, (next: number = 0) => next)]
   const reAtoms = [atom(0, `${0}`)]
@@ -55,7 +55,14 @@ async function testAggregateGrowing(count: number) {
   }
 
   if (new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get()]).size > 1) {
-    throw new Error(`Mismatch: ${molAtom.sync()} !== ${ctx.get(reAtom)}`)
+    throw new Error(
+      'Mismatch: ' +
+        JSON.stringify({
+          mol: molAtom.sync(),
+          reatom: ctx.get(reAtom),
+          mobx: mobxAtom.get(),
+        }),
+    )
   }
 
   console.log(`Median of sum calc of reactive nodes in list from 1 to ${count}`)
@@ -68,19 +75,22 @@ async function testAggregateGrowing(count: number) {
 }
 
 async function testAggregateShrinking(count: number) {
-  const { observable, computed, autorun, configure } = await import('mobx')
-  configure({ enforceActions: 'never' })
-
   const mol_wire_lib = await import('mol_wire_lib')
-  const { $mol_wire_atom } = mol_wire_lib
+  const { $mol_wire_atom } = mol_wire_lib.default
 
   const { atom, createCtx } = await import('@reatom/core')
 
+  const { observable, computed, autorun, configure } = await import('mobx')
+  configure({ enforceActions: 'never' })
+
   const molAtoms = Array.from(
-    { length: 1000 },
+    { length: count },
     (_, i) => new $mol_wire_atom(`${i}`, (next: number = 0) => next),
   )
-  const reAtoms = Array.from({ length: 1000 }, (_, i) => atom(0, `${i}`))
+  const reAtoms = Array.from({ length: count }, (_, i) => atom(0, `${i}`))
+  const mobxAtoms = Array.from({ length: count }, (_, i) =>
+    observable.box(i, { name: `${i}` }),
+  )
 
   const molAtom = new $mol_wire_atom(`sum`, () =>
     molAtoms.reduce((sum, atom) => sum + atom.sync(), 0),
@@ -90,12 +100,18 @@ async function testAggregateShrinking(count: number) {
     `sum`,
   )
   const ctx = createCtx()
+  const mobxAtom = computed(
+    () => mobxAtoms.reduce((sum, atom) => sum + atom.get(), 0),
+    { name: `sum` },
+  )
 
   ctx.subscribe(reAtom, () => {})
   molAtom.sync()
+  autorun(() => mobxAtom.get())
 
   const reatomLogs = new Array<number>()
   const molLogs = new Array<number>()
+  const mobxLogs = new Array<number>()
   let i = 1
   while (i++ < count) {
     const startReatom = performance.now()
@@ -107,11 +123,22 @@ async function testAggregateShrinking(count: number) {
     molAtom.sync()
     molLogs.push(performance.now() - startMol)
 
+    const startMobx = performance.now()
+    mobxAtoms.pop()!.set(i)
+    mobxLogs.push(performance.now() - startMobx)
+
     await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
-  if (molAtom.sync() !== ctx.get(reAtom)) {
-    throw new Error(`Mismatch: ${molAtom.sync()} !== ${ctx.get(reAtom)}`)
+  if (new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get()]).size > 1) {
+    throw new Error(
+      'Mismatch: ' +
+        JSON.stringify({
+          mol: molAtom.sync(),
+          reatom: ctx.get(reAtom),
+          mobx: mobxAtom.get(),
+        }),
+    )
   }
 
   console.log(`Median of sum calc of reactive nodes in list from ${count} to 1`)
@@ -119,5 +146,84 @@ async function testAggregateShrinking(count: number) {
   printLogs({
     reatom: formatLog(reatomLogs),
     $mol_wire: formatLog(molLogs),
+    mobx: formatLog(mobxLogs),
   })
 }
+
+async function testParent(count: number) {
+  const mol_wire_lib = await import('mol_wire_lib')
+  const { $mol_wire_atom } = mol_wire_lib.default
+
+  const { atom, createCtx } = await import('@reatom/core')
+
+  const { observable, computed, autorun, configure } = await import('mobx')
+  configure({ enforceActions: 'never' })
+
+  const molAtom = new $mol_wire_atom(`0`, (next: number = 0) => next)
+  const reAtom = atom(0, `${0}`)
+  const ctx = createCtx()
+  const mobxAtom = observable.box(0, { name: `${0}` })
+
+  {
+    let i = count
+    while (i--) {
+      new $mol_wire_atom(`${i}`, () => molAtom.sync()).sync()
+
+      ctx.subscribe(
+        atom((ctx) => ctx.spy(reAtom)),
+        () => {},
+      )
+
+      const mobxDepAtom = computed(() => mobxAtom.get())
+      autorun(() => mobxDepAtom.get())
+    }
+  }
+
+  const reatomLogs = new Array<number>()
+  const molLogs = new Array<number>()
+  const mobxLogs = new Array<number>()
+  let i = 1000
+  while (i--) {
+    const startReatom = performance.now()
+    reAtom(ctx, i)
+    reatomLogs.push(performance.now() - startReatom)
+
+    const startMol = performance.now()
+    molAtom.put(i)
+    molAtom.sync()
+    molLogs.push(performance.now() - startMol)
+
+    const startMobx = performance.now()
+    mobxAtom.set(i)
+    mobxLogs.push(performance.now() - startMobx)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  }
+
+  if (new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get()]).size > 1) {
+    throw new Error(
+      'Mismatch: ' +
+        JSON.stringify({
+          mol: molAtom.sync(),
+          reatom: ctx.get(reAtom),
+          mobx: mobxAtom.get(),
+        }),
+    )
+  }
+
+  console.log(`Median of update 1 node with ${count} reactive children`)
+
+  printLogs({
+    reatom: formatLog(reatomLogs),
+    // $mol_wire: formatLog(molLogs),
+    mobx: formatLog(mobxLogs),
+  })
+}
+
+;(async () => {
+  // await testAggregateGrowing(100)
+  // await testAggregateShrinking(100)
+  await testParent(100_000)
+
+  process.exit()
+})()
