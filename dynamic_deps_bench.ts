@@ -221,9 +221,9 @@ async function testParent(count: number) {
 }
 
 ;(async () => {
-  // await testAggregateGrowing(100)
-  // await testAggregateShrinking(100)
-  await testParent(100_000)
+  await testAggregateGrowing(1000)
+  await testAggregateShrinking(1000)
+  await testParent(1000)
 
   process.exit()
 })()

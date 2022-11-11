@@ -56,25 +56,25 @@ const testComputers = setupComputersTest({
   //   return (i) => listener(h(i))
   // },
   async spred({ listener, startCreation, endCreation }) {
-    const { writable, computed } = await import('spred');
+    const { writable, computed } = await import('spred')
 
-    startCreation();
+    startCreation()
 
-    const entry = writable(0);
-    const a = computed(() => entry());
-    const b = computed(() => a() + 1);
-    const c = computed(() => a() + 1);
-    const d = computed(() => b() + c());
-    const e = computed(() => d() + 1);
-    const f = computed(() => d() + e());
-    const g = computed(() => d() + e());
-    const h = computed(() => f() + g());
+    const entry = writable(0)
+    const a = computed(() => entry())
+    const b = computed(() => a() + 1)
+    const c = computed(() => a() + 1)
+    const d = computed(() => b() + c())
+    const e = computed(() => d() + 1)
+    const f = computed(() => d() + e())
+    const g = computed(() => d() + e())
+    const h = computed(() => f() + g())
 
-    h.subscribe(listener);
+    h.subscribe(listener)
 
-    endCreation();
+    endCreation()
 
-    return (i) => entry(i);
+    return (i) => entry(i)
   },
   async cellx({ listener, startCreation, endCreation }) {
     const { cellx, Cell } = await import('cellx')
@@ -266,7 +266,7 @@ const testComputers = setupComputersTest({
 
     const entry = action<number>()
     const a = atom((ctx, state = 0) => {
-      ctx.spy(entry).forEach((v) => (state = v))
+      ctx.spy(entry).forEach((v) => (state = v.payload))
       return state
     })
     const b = atom((ctx) => ctx.spy(a) + 1)
@@ -498,7 +498,7 @@ function setupComputersTest(tests: Rec<Setup>) {
         let mem = globalThis.process?.memoryUsage?.().heapUsed
 
         const start = performance.now()
-        test.update(i)
+        test.update(i % 2)
         test.updateLogs.push(performance.now() - start)
 
         if (mem) test.memLogs.push(process.memoryUsage().heapUsed - mem)
@@ -521,13 +521,11 @@ function setupComputersTest(tests: Rec<Setup>) {
     console.log(`Median of update duration from ${iterations} iterations`)
 
     const results = testsList.reduce(
-      (acc, { name, updateLogs }) => (
-        (acc[name] = formatLog(updateLogs)), acc
-      ),
+      (acc, { name, updateLogs }) => ((acc[name] = formatLog(updateLogs)), acc),
       {} as Rec<any>,
-    );
+    )
 
-    printLogs(results);
+    printLogs(results)
 
     if (globalThis.gc) {
       console.log(`Median of "heapUsed" from ${iterations} iterations`)
@@ -539,7 +537,7 @@ function setupComputersTest(tests: Rec<Setup>) {
       )
     }
 
-    return results;
+    return results
   }
 }
 
@@ -548,7 +546,7 @@ export async function test() {
     10: await testComputers(10, 5),
     100: await testComputers(100, 0),
     1_000: await testComputers(1_000, 0),
-    10_000: await testComputers(10_000, 0)
+    10_000: await testComputers(10_000, 0),
   }
 
   await genChart(results)
@@ -558,6 +556,6 @@ if (globalThis.process) {
   import('perf_hooks')
     // @ts-expect-error
     .then(({ performance }) => (globalThis.performance = performance))
-    .then(() => (globalThis.gc ? testComputers(300, 0) : test()))
+    .then((): any => (globalThis.gc ? testComputers(300, 0) : test()))
     .then(() => process.exit())
 }

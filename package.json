@@ -27,7 +27,7 @@
     "@frp-ts/core": "^1.0.0-beta.3",
     "@ngrx/store": "^14.3.2",
     "@preact/signals-core": "^1.2.2",
-    "@reatom/core": "alpha",
+    "@reatom/core": "^3.1.0",
     "@types/node": "latest",
     "cellx": "^1.10.29",
     "effector": "^22.3.0",
