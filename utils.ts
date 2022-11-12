@@ -5,13 +5,14 @@ export function printLogs(results: Rec<ReturnType<typeof formatLog>>) {
 
   const tabledData = Object.entries(results)
     .sort(([, { med: a }], [, { med: b }]) => a - b)
-    .reduce((acc, [name, { min, med, max }]) => {
+    .reduce((acc, [name, { min, med, max, complexity }]) => {
       acc[name] = {
-        'pos %': ((medFastest / med) * 100).toFixed(0),
-        'avg ms': med.toFixed(3),
-        'min ms': min.toFixed(5),
-        'med ms': med.toFixed(5),
-        'max ms': max.toFixed(5),
+        'pos %': Math.round((medFastest / med) * 100),
+        // 'avg ms': med.toFixed(3),
+        'min ms': Number(min.toFixed(4)),
+        'med ms': Number(med.toFixed(4)),
+        'max ms': Number(max.toFixed(4)),
+        'complex': complexity,
       }
       return acc
     }, {} as Rec<Rec>)
@@ -23,11 +24,19 @@ export function formatPercent(n = 0) {
   return `${n < 1 ? ` ` : ``}${(n * 100).toFixed(0)}%`
 }
 
-export function formatLog(values: Array<number>) {
+export function getComplexity(fn: Function) {
+  return fn.toString()
+    .replace( /\/\/.*$/gm, '' ) // drop comments
+    .replace( /__\w+\(.*?\);/g, '_' ) // drop generated decoration
+    .match( /\w+/g )?.length ?? 0 // calc named tokens
+}
+
+export function formatLog(values: Array<number>, complexity: number) {
   return {
     min: min(values),
     med: med(values),
     max: max(values),
+    complexity,
   }
 }
 

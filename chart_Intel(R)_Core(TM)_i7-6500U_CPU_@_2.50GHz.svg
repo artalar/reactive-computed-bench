@@ -1,0 +1,255 @@
+<svg id="bench-chart" viewBox="0 0 830 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    #bench-chart .grid {
+      stroke: #777777;
+      stroke-width: 1;
+    }
+
+    #bench-chart .dashed {
+      stroke: #777777;
+      opacity: 0.3;
+      stroke-width: 1;
+      stroke-dasharray: 5, 5;
+    }
+
+    #bench-chart .labels {
+      fill: #777777;
+      font-size: 13px;
+      font-family: sans-serif;
+    }
+
+    #bench-chart .x-labels {
+      text-anchor: middle;
+    }
+
+    #bench-chart .y-labels {
+      text-anchor: start;
+    }
+
+    #bench-chart .lib-label {
+      font-size: 13px;
+      font-family: sans-serif;
+      text-anchor: end;
+    }
+
+    #bench-chart .line-med {
+      stroke-width: 6;
+      opacity: 0.6;
+    }
+  </style>
+
+  <g class="grid">
+    <line x1="100" y1="520" x2="830" y2="520"></line>
+    <line x1="100" y1="520" x2="100" y2="0"></line>
+  </g>
+
+  <g class="dashed">
+    <line x1="330" y1="520" x2="330" y2="0"></line>
+    <line x1="560" y1="520" x2="560" y2="0"></line>
+    <line x1="790" y1="520" x2="790" y2="0"></line>
+
+    <line x1="100" y1="20" x2="790" y2="20"></line>
+    <line x1="100" y1="145" x2="790" y2="145"></line>
+    <line x1="100" y1="270" x2="790" y2="270"></line>
+    <line x1="100" y1="395" x2="790" y2="395"></line>
+  </g>
+
+  <g class="labels x-labels">
+    <text x="100" y="540">10</text>
+    <text x="330" y="540">100</text>
+    <text x="560" y="540">1000</text>
+    <text x="790" y="540">10000</text>
+    <text x="445" y="560">ITERATIONS</text>
+  </g>
+
+  <g class="labels y-labels">
+    <text x="795" y="23">100%</text>
+    <text x="795" y="148">75%</text>
+    <text x="795" y="273">50%</text>
+    <text x="795" y="398">25%</text>
+  </g>
+
+  <!--CONTENT_START--><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="23"
+      fill="#e60049"
+    >s.js</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e60049" 
+      points="100,20 330,123.01886283192773 560,159.6825366790303 790,20"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="124.06382798036107"
+      fill="#0bb4ff"
+    >spred</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#0bb4ff" 
+      points="100,121.06382798036107 330,152.16783459075555 560,20 790,35.350891704587426"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="140.06382798036105"
+      fill="#50e991"
+    >frpts</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#50e991" 
+      points="100,133.97058642259879 330,20 560,107.27271495771794 790,134.98257907561526"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="159.42658331097257"
+      fill="#e6d800"
+    >usignal</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e6d800" 
+      points="100,156.42658331097257 330,105.50038912991398 560,94.90637592474746 790,171.4195647544763"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="175.42658331097257"
+      fill="#9b19f5"
+    >preact</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#9b19f5" 
+      points="100,157.93103182500099 330,184.32673501682936 560,198.47025230425163 790,152.8903600004307"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="276.2894681559799"
+      fill="#ffa300"
+    >solid</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#ffa300" 
+      points="100,273.2894681559799 330,311.5180352627148 560,225.19479639836996 790,192.1068340283708"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="309.0635690882941"
+      fill="#dc0ab4"
+    >$mol_wire_atom</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#dc0ab4" 
+      points="100,306.0635690882941 330,295.884107060018 560,268.8937968764842 790,195.0000041087761"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="353.2069871023512"
+      fill="#b3d4ff"
+    >cellx</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#b3d4ff" 
+      points="100,350.2069871023512 330,343.37139046359965 560,366.41406778516114 790,272.2421487207762"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="387.1304326343378"
+      fill="#00bfa0"
+    >whatsup</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#00bfa0" 
+      points="100,384.1304326343378 330,381.76084152359124 560,386.8621661153929 790,377.78636011570933"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="404.8631861658411"
+      fill="#e60049"
+    >mobx</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e60049" 
+      points="100,401.8631861658411 330,404.5478486331964 560,427.11947407619795 790,406.78278834200177"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="420.8631861658411"
+      fill="#0bb4ff"
+    >reatom</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#0bb4ff" 
+      points="100,409.14695814902973 330,374.575614350531 560,344.7104201677264 790,344.8811405079749"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="436.8631861658411"
+      fill="#50e991"
+    >wonka</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#50e991" 
+      points="100,417.0991766173853 330,394.0119760543158 560,431.11981058605556 790,432.44057154631827"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="452.8631861658411"
+      fill="#e6d800"
+    >effector</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e6d800" 
+      points="100,448.20021872222685 330,295.884107060018 560,376.69191491587424 790,395"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="92"
+      y="474.73745136061245"
+      fill="#9b19f5"
+    >effector (fork)</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#9b19f5" 
+      points="100,471.73745136061245 330,408.5829274278021 560,448.70602866803927 790,448.05989670177445"
+    ></polyline>
+  </g><!--CONTENT_END-->
+</svg>

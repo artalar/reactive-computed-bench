@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ES2020",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"experimentalDecorators": true
+	}
+}

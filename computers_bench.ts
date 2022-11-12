@@ -2,7 +2,7 @@
 import type { Source as WSource } from 'wonka'
 import { genChart } from './chart_gen'
 
-import { Rec, formatLog, printLogs } from './utils'
+import { Rec, formatLog, printLogs, getComplexity } from './utils'
 
 type UpdateLeaf = (value: number) => void
 
@@ -212,7 +212,7 @@ const testComputers = setupComputersTest({
 
     return (i) => (proxy.entry = i)
   },
-  async mol({ listener, startCreation, endCreation }) {
+  async $mol_wire_atom({ listener, startCreation, endCreation }) {
     const mol_wire_lib = await import('mol_wire_lib')
     const { $mol_wire_atom } = mol_wire_lib.default
 
@@ -238,6 +238,34 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
+  // async $mol_wire_solo({ listener, startCreation, endCreation }) {
+  //   const mol_wire_lib = await import('mol_wire_lib')
+  //   const { $mol_wire_solo: mem } = mol_wire_lib.default
+
+  //   startCreation()
+
+  //   class App extends Object {
+  //     @mem static entry(next = 0) { return next }
+  //     @mem static a() { return this.entry() }
+  //     @mem static b() { return this.a() + 1 }
+  //     @mem static c() { return this.a() + 1 }
+  //     @mem static d() { return this.b() + this.c() }
+  //     @mem static e() { return this.d() + 1 }
+  //     @mem static f() { return this.d() + this.e() }
+  //     @mem static g() { return this.d() + this.e() }
+  //     @mem static h() { return this.f() + this.g() }
+  //   }
+
+  //   listener(App.h())
+
+  //   endCreation()
+
+  //   return (i) => {
+  //     App.entry(i)
+  //     // the batch doing the same https://github.com/hyoo-ru/mam_mol/blob/c9cf0faf966c8bb3d0e76339527ef03e03d273e8/wire/fiber/fiber.ts#L31
+  //     listener(App.h())
+  //   }
+  // },
   async preact({ listener, startCreation, endCreation }) {
     const { signal, computed, effect } = await import('@preact/signals-core')
 
@@ -442,9 +470,12 @@ function setupComputersTest(tests: Rec<Setup>) {
       creationLogs: Array<number>
       updateLogs: Array<number>
       memLogs: Array<number>
+      complexity: number
     }> = []
 
     for (const name in tests) {
+      await new Promise((resolve) => setTimeout(resolve, 0)) // wait idle
+
       const ref = { value: 0 }
       const creationLogs: Array<number> = []
       let update: UpdateLeaf
@@ -472,7 +503,9 @@ function setupComputersTest(tests: Rec<Setup>) {
         creationLogs,
         updateLogs: [],
         memLogs: [],
+        complexity: getComplexity( tests[name] ),
       })
+      
     }
 
     if (creationTries > 0) {
@@ -482,9 +515,9 @@ function setupComputersTest(tests: Rec<Setup>) {
 
       printLogs(
         Object.fromEntries(
-          testsList.map(({ name, creationLogs }) => [
+          testsList.map(({ name, creationLogs, complexity }) => [
             name,
-            formatLog(creationLogs),
+            formatLog(creationLogs, complexity),
           ]),
         ),
       )
@@ -492,6 +525,10 @@ function setupComputersTest(tests: Rec<Setup>) {
 
     let i = 0
     while (i++ < iterations) {
+      await new Promise((resolve) => setTimeout(resolve, 0)) // wait idle
+      
+      testsList.sort( ()=> Math.random() - .5 )
+      
       for (const test of testsList) {
         globalThis.gc?.()
         globalThis.gc?.()
@@ -514,14 +551,12 @@ function setupComputersTest(tests: Rec<Setup>) {
         )
         return
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 0))
     }
 
     console.log(`Median of update duration from ${iterations} iterations`)
 
     const results = testsList.reduce(
-      (acc, { name, updateLogs }) => ((acc[name] = formatLog(updateLogs)), acc),
+      (acc, { name, updateLogs, complexity }) => ((acc[name] = formatLog(updateLogs, complexity)), acc),
       {} as Rec<any>,
     )
 
@@ -531,7 +566,7 @@ function setupComputersTest(tests: Rec<Setup>) {
       console.log(`Median of "heapUsed" from ${iterations} iterations`)
       printLogs(
         testsList.reduce(
-          (acc, { name, memLogs }) => ((acc[name] = formatLog(memLogs)), acc),
+          (acc, { name, memLogs, complexity }) => ((acc[name] = formatLog(memLogs, complexity)), acc),
           {} as Rec<any>,
         ),
       )

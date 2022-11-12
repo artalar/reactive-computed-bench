@@ -2,6 +2,11 @@ This benchmark measured computation of complex computed reactive unit when it de
 
 ## Results
 
+### Intel(R)_Core(TM)_i7-6500U_CPU_@_2.50GHz
+
+![](./chart_Intel(R)_Core(TM)_i7-6500U_CPU_@_2.50GHz.svg)
+<!-- ### Intel(R)_Core(TM)_i7-6500U_CPU_@_2.50GHz -->
+
 ### AMD_EPYC_7B13
 
 ![](./chart_AMD_EPYC_7B13.svg)
