@@ -16,7 +16,7 @@ interface ChartData {
 }
 
 const CPU = cpus()[0]?.model?.replace(/ /g, '_') ?? 'unknown_cpu'
-const CHART_NAME = `./chart_${CPU}.svg`
+const CHART_PATH = `./chart_${CPU}.svg`
 const CHART_TEMPLATE = './chart_template.svg'
 const START_MARK = '<!--CONTENT_START-->'
 const END_MARK = '<!--CONTENT_END-->'
@@ -44,19 +44,18 @@ export async function genChart(results: BenchResults) {
   const template = await readFile(CHART_TEMPLATE, 'utf8')
 
   await writeFile(
-    CHART_NAME,
+    CHART_PATH,
     template.replace(REGEX, START_MARK + getSVGString(results) + END_MARK),
   )
 
   let readme = await readFile('./README.md', 'utf8')
   if (readme.includes(CPU)) {
     readme = readme.replace(
-      new RegExp(`### ${CPU}(.|\n)*#`),
+      new RegExp(`### ${CPU}(.|\n)*<!-- ### ${CPU} -->`),
       `### ${CPU}
 
-![](${CHART_NAME})
-
-#`,
+![](${CHART_PATH})
+<!-- ### ${CPU} -->`,
     )
   } else {
     readme = readme.replace(
@@ -65,8 +64,8 @@ export async function genChart(results: BenchResults) {
 
 ### ${CPU}
 
-![](${CHART_NAME})
-`,
+![](${CHART_PATH})
+<!-- ### ${CPU} -->`,
     )
   }
 
