@@ -489,6 +489,7 @@ function setupComputersTest(tests: Rec<Setup>) {
 
     let i = 0
     while (i++ < iterations) {
+      testsList.sort(() => Math.random() - 0.5)
       for (const test of testsList) {
         globalThis.gc?.()
         globalThis.gc?.()
