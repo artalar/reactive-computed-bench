@@ -264,11 +264,8 @@ const testComputers = setupComputersTest({
 
     startCreation()
 
-    const entry = action<number>()
-    const a = atom((ctx, state = 0) => {
-      ctx.spy(entry).forEach((v) => (state = v.payload))
-      return state
-    })
+    const entry = atom(0)
+    const a = atom((ctx) => ctx.spy(entry))
     const b = atom((ctx) => ctx.spy(a) + 1)
     const c = atom((ctx) => ctx.spy(a) + 1)
     const d = atom((ctx) => ctx.spy(b) + ctx.spy(c))
