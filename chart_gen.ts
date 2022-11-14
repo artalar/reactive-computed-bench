@@ -8,6 +8,7 @@ type Point = [number, number]
 
 interface ChartData {
   lib: string
+  version: string
   color: string
   min: Point[]
   med: Point[]
@@ -40,12 +41,21 @@ const PALETTE = [
   '#00bfa0',
 ]
 
+const PACKAGES = {
+  preact: '@preact/signals-core',
+  's.js': 's-js',
+  reatom: '@reatom/core',
+  mol: 'mol_wire_lib',
+  solid: 'solid-js',
+  frpts: '@frp-ts/core',
+}
+
 export async function genChart(results: BenchResults) {
   const template = await readFile(CHART_TEMPLATE, 'utf8')
 
   await writeFile(
     CHART_PATH,
-    template.replace(REGEX, START_MARK + getSVGString(results) + END_MARK),
+    template.replace(REGEX, START_MARK + await getSVGString(results) + END_MARK),
   )
 
   let readme = await readFile('./README.md', 'utf8')
@@ -74,11 +84,12 @@ export async function genChart(results: BenchResults) {
   await writeFile('./README.md', readme)
 }
 
-function getSVGString(results: BenchResults) {
-  return getChartData(results).map(getLibSVG).join('')
+async function getSVGString(results: BenchResults) {
+  const data = await getChartData(results);
+  return data.map(getLibSVG).join('')
 }
 
-function getChartData(results: BenchResults) {
+async function getChartData(results: BenchResults) {
   const grouped: Record<
     string,
     {
@@ -90,6 +101,7 @@ function getChartData(results: BenchResults) {
 
   const arr: {
     lib: string
+    version: string
     min: number[]
     med: number[]
     max: number[]
@@ -138,10 +150,19 @@ function getChartData(results: BenchResults) {
     i++
   }
 
-  for (let name in grouped) {
+  for (let lib in grouped) {
+    const path = `./node_modules/${PACKAGES[lib] || lib}/package.json`;
+    let version = '';
+
+    try {
+      const file = await readFile(path, 'utf8');
+      version = JSON.parse(file).version;
+    } catch (e) {}
+
     arr.push({
-      lib: name,
-      ...grouped[name]!,
+      lib,
+      version,
+      ...grouped[lib]!,
     })
   }
 
@@ -149,9 +170,10 @@ function getChartData(results: BenchResults) {
 
   const toPoint = (v: number, i: number) => getPoint(v, fastest.med[i]!, i)
   const data = arr
-    .map(({ lib, min, med, max }, i) => {
+    .map(({ lib, min, med, max, version }, i) => {
       return {
         lib,
+        version,
         color: PALETTE[i % PALETTE.length],
         min: min.map(toPoint),
         med: med.map(toPoint),
@@ -178,14 +200,14 @@ function getPoint(value: number, minValue: number, step: number) {
   return [x, y]
 }
 
-function getLibSVG({ lib, color, med, labelY }: ChartData) {
+function getLibSVG({ lib, color, med, labelY, version }: ChartData) {
   return `<g>
     <text
       class="lib-label"
-      x="92"
+      x="95"
       y="${labelY}"
       fill="${color}"
-    >${lib}</text>
+    >${lib} ${version}</text>
     <polyline
       class="line-med"
       fill="none"
