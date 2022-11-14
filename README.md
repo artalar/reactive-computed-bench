@@ -15,9 +15,11 @@ Median value in percent from a fastest library for each iteration loop.
 ### AMD_EPYC_7B13
 
 ![](./chart_AMD_EPYC_7B13.svg)
+
 <!-- ### AMD_EPYC_7B13 -->
 
 ### Apple_M1
 
 ![](./chart_Apple_M1.svg)
+
 <!-- ### Apple_M1 -->

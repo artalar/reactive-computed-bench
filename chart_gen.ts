@@ -55,6 +55,7 @@ export async function genChart(results: BenchResults) {
       `### ${CPU}
 
 ![](${CHART_PATH})
+
 <!-- ### ${CPU} -->`,
     )
   } else {
@@ -65,6 +66,7 @@ export async function genChart(results: BenchResults) {
 ### ${CPU}
 
 ![](${CHART_PATH})
+
 <!-- ### ${CPU} -->`,
     )
   }
