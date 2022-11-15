@@ -1,6 +1,7 @@
-import { formatLog, Rec } from './utils'
 import { writeFile, readFile } from 'fs/promises'
 import { cpus } from 'os'
+import path from 'path'
+import { formatLog, Rec } from './utils'
 
 type BenchData = Rec<ReturnType<typeof formatLog>> | undefined
 type BenchResults = Rec<BenchData>
@@ -42,12 +43,13 @@ const PALETTE = [
 ]
 
 const PACKAGES = {
-  preact: '@preact/signals-core',
+  'effector (fork)': 'effector',
   's.js': 's-js',
-  reatom: '@reatom/core',
-  mol: 'mol_wire_lib',
-  solid: 'solid-js',
   frpts: '@frp-ts/core',
+  mol: 'mol_wire_lib',
+  preact: '@preact/signals-core',
+  reatom: '@reatom/core',
+  solid: 'solid-js',
 }
 
 export async function genChart(results: BenchResults) {
@@ -55,7 +57,10 @@ export async function genChart(results: BenchResults) {
 
   await writeFile(
     CHART_PATH,
-    template.replace(REGEX, START_MARK + await getSVGString(results) + END_MARK),
+    template.replace(
+      REGEX,
+      START_MARK + (await getSVGString(results)) + END_MARK,
+    ),
   )
 
   let readme = await readFile('./README.md', 'utf8')
@@ -85,7 +90,7 @@ export async function genChart(results: BenchResults) {
 }
 
 async function getSVGString(results: BenchResults) {
-  const data = await getChartData(results);
+  const data = await getChartData(results)
   return data.map(getLibSVG).join('')
 }
 
@@ -151,13 +156,17 @@ async function getChartData(results: BenchResults) {
   }
 
   for (let lib in grouped) {
-    const path = `./node_modules/${PACKAGES[lib] || lib}/package.json`;
-    let version = '';
+    // @ts-expect-error
+    const moduleName = PACKAGES[lib] || lib
+    const modulePath = path.join(
+      __dirname,
+      'node_modules',
+      moduleName,
+      'package.json',
+    )
 
-    try {
-      const file = await readFile(path, 'utf8');
-      version = JSON.parse(file).version;
-    } catch (e) {}
+    const file = await readFile(modulePath, 'utf8')
+    const version = JSON.parse(file).version
 
     arr.push({
       lib,
