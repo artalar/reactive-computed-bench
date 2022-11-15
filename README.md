@@ -8,9 +8,15 @@ The rules:
 
 The charts shows median value. If you will start the bench by yourself you could see average, minimum and maximum (5%) values in your console.
 
+The results above is a median value in percent from a fastest library for each iteration loop.
+
 ## Results
 
-Median value in percent from a fastest library for each iteration loop.
+### AMD_EPYC_7B13
+
+![](./chart_AMD_EPYC_7B13.svg)
+
+<!-- ### AMD_EPYC_7B13 -->
 
 ### Apple_M1
 

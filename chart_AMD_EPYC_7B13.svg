@@ -1,0 +1,255 @@
+<svg id="bench-chart" viewBox="0 0 830 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    #bench-chart .grid {
+      stroke: #777777;
+      stroke-width: 1;
+    }
+
+    #bench-chart .dashed {
+      stroke: #777777;
+      opacity: 0.3;
+      stroke-width: 1;
+      stroke-dasharray: 5, 5;
+    }
+
+    #bench-chart .labels {
+      fill: #777777;
+      font-size: 13px;
+      font-family: sans-serif;
+    }
+
+    #bench-chart .x-labels {
+      text-anchor: middle;
+    }
+
+    #bench-chart .y-labels {
+      text-anchor: start;
+    }
+
+    #bench-chart .lib-label {
+      font-size: 12px;
+      font-family: sans-serif;
+      text-anchor: end;
+    }
+
+    #bench-chart .line-med {
+      stroke-width: 6;
+      opacity: 0.6;
+    }
+  </style>
+
+  <g class="grid">
+    <line x1="100" y1="520" x2="830" y2="520"></line>
+    <line x1="100" y1="520" x2="100" y2="0"></line>
+  </g>
+
+  <g class="dashed">
+    <line x1="330" y1="520" x2="330" y2="0"></line>
+    <line x1="560" y1="520" x2="560" y2="0"></line>
+    <line x1="790" y1="520" x2="790" y2="0"></line>
+
+    <line x1="100" y1="20" x2="790" y2="20"></line>
+    <line x1="100" y1="145" x2="790" y2="145"></line>
+    <line x1="100" y1="270" x2="790" y2="270"></line>
+    <line x1="100" y1="395" x2="790" y2="395"></line>
+  </g>
+
+  <g class="labels x-labels">
+    <text x="100" y="540">10</text>
+    <text x="330" y="540">100</text>
+    <text x="560" y="540">1000</text>
+    <text x="790" y="540">10000</text>
+    <text x="445" y="560">ITERATIONS</text>
+  </g>
+
+  <g class="labels y-labels">
+    <text x="795" y="23">100%</text>
+    <text x="795" y="148">75%</text>
+    <text x="795" y="273">50%</text>
+    <text x="795" y="398">25%</text>
+  </g>
+
+  <!--CONTENT_START--><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="23"
+      fill="#e60049"
+    >frpts 1.0.0-beta.3</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e60049" 
+      points="100,20 330,20 560,123.75739098300075 790,172.30004410398263"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="56.46324079530183"
+      fill="#0bb4ff"
+    >s.js 0.4.9</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#0bb4ff" 
+      points="100,53.46324079530183 330,51.36731641434531 560,153.75346910891932 790,20"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="72.46324079530183"
+      fill="#50e991"
+    >spred 0.31.1</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#50e991" 
+      points="100,56.167627028134476 330,52.95601075698429 560,20 790,66.81858009498774"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="98.10313113124279"
+      fill="#e6d800"
+    >preact 1.2.2</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e6d800" 
+      points="100,95.10313113124279 330,96.08721259943223 560,167.29542142676223 790,142.46610626545908"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="190.65565601682846"
+      fill="#9b19f5"
+    >usignal 0.8.9</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#9b19f5" 
+      points="100,187.65565601682846 330,115.06485302178591 560,135.92542975144443 790,214.83101391650098"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="246.18330519569162"
+      fill="#ffa300"
+    >solid 1.6.2</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#ffa300" 
+      points="100,243.18330519569162 330,251.6354794206789 560,242.61264477540894 790,224.87850086862974"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="274.1479918419961"
+      fill="#dc0ab4"
+    >mol 1.0.370</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#dc0ab4" 
+      points="100,271.1479918419961 330,254.9518112854182 560,229.75048556172894 790,149.40303956916617"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="308.65964143685335"
+      fill="#b3d4ff"
+    >cellx 1.10.29</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#b3d4ff" 
+      points="100,305.65964143685335 330,300.70701188088475 560,352.0808687304339 790,285.50470425837904"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="344.3146176541815"
+      fill="#00bfa0"
+    >reatom 3.1.3</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#00bfa0" 
+      points="100,341.3146176541815 330,324.9494390287338 560,339.6669270726028 790,336.10979763392936"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="360.3146176541815"
+      fill="#e60049"
+    >whatsup 2.4.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e60049" 
+      points="100,355.6341146805255 330,357.07689491834117 560,387.6262709813779 790,392.49769573675974"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="424.1590239735365"
+      fill="#0bb4ff"
+    >mobx 6.7.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#0bb4ff" 
+      points="100,421.1590239735365 330,379.4233231062504 560,425.3885507910079 790,415.97919622355096"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="440.1590239735365"
+      fill="#50e991"
+    >wonka 6.1.1</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#50e991" 
+      points="100,435.42062714359383 330,384.20376840172565 560,445.31257259461285 790,457.1593453239136"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="456.1590239735365"
+      fill="#e6d800"
+    >effector 22.4.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#e6d800" 
+      points="100,441.0118047672781 330,253.96554992493978 560,389.91913563509553 790,413.15704571530824"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="472.1590239735365"
+      fill="#9b19f5"
+    >effector (fork) 22.4.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="#9b19f5" 
+      points="100,463.7976628325369 330,385.4450450546692 560,451.4858218544786 790,456.85519811315623"
+    ></polyline>
+  </g><!--CONTENT_END-->
+</svg>
