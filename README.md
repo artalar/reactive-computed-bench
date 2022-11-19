@@ -12,6 +12,12 @@ The results above is a median value in percent from a fastest library for each i
 
 ## Results
 
+### AMD_EPYC_7B12
+
+![](./chart_AMD_EPYC_7B12.svg)
+
+<!-- ### AMD_EPYC_7B12 -->
+
 ### AMD_EPYC_7B13
 
 ![](./chart_AMD_EPYC_7B13.svg)
