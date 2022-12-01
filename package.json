@@ -34,6 +34,8 @@
     "mobx": "^6.7.0",
     "mol_wire_lib": "^1.0.380",
     "nanostores": "^0.7.1",
+    "reatom-v1": "npm:@reatom/core@^1.1.5",
+    "reatom-v2": "npm:@reatom/core@^2.0.20",
     "redux": "^4.2.0",
     "reselect": "^4.1.7",
     "s-js": "^0.4.9",

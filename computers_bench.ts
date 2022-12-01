@@ -280,6 +280,53 @@ const testComputers = setupComputersTest({
 
     return (i) => (entry.value = i)
   },
+  async 'reatom-v1'({ listener, startCreation, endCreation }) {
+    const { declareAction, declareAtom, map, combine, createStore } =
+      await import('reatom-v1')
+
+    startCreation()
+
+    const entry = declareAction<number>()
+    const a = declareAtom(0, (on) => [on(entry, (state, v) => v)])
+    const b = map(a, (v) => v + 1)
+    const c = map(a, (v) => v + 1)
+    const d = map(combine([b, c]), ([v1, v2]) => v1 + v2)
+    const e = map(d, (v) => v + 1)
+    const f = map(combine([d, e]), ([v1, v2]) => v1 + v2)
+    const g = map(combine([d, e]), ([v1, v2]) => v1 + v2)
+    const h = map(combine([f, g]), ([v1, v2]) => v1 + v2)
+
+    const store = createStore()
+    store.subscribe(h, listener)
+
+    endCreation()
+
+    return (i) => store.dispatch(entry(i))
+  },
+  async 'reatom-v2'({ listener, startCreation, endCreation }) {
+    const { createAtom, createStore } = await import('reatom-v2')
+
+    startCreation()
+
+    const a = createAtom({ entry: (v: number) => v }, (track, state = 0) => {
+      track.onAction('entry', (v) => (state = v))
+      return state
+    })
+    const b = createAtom({ a }, (track) => track.get('a') + 1)
+    const c = createAtom({ a }, (track) => track.get('a') + 1)
+    const d = createAtom({ b, c }, (track) => track.get('b') + track.get('c'))
+    const e = createAtom({ d }, (track) => track.get('d') + 1)
+    const f = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
+    const g = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
+    const h = createAtom({ f, g }, (track) => track.get('f') + track.get('g'))
+
+    const store = createStore()
+    store.subscribe(h, listener)
+
+    endCreation()
+
+    return (i) => store.dispatch(a.entry(i))
+  },
   async reatom({ listener, startCreation, endCreation }) {
     const { action, atom, createCtx } = await import('@reatom/core')
 
