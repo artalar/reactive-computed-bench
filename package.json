@@ -17,7 +17,7 @@
     "url": "git+ssh://git@github.com/artalar/reactive-computed-bench.git"
   },
   "engines": {
-    "npm": ">=8.0.0"
+    "node": ">=18.0.0"
   },
   "bugs": {
     "url": "https://github.com/artalar/reactive-computed-bench/issues"
@@ -25,14 +25,14 @@
   "homepage": "https://github.com/artalar/reactive-computed-bench/tree/main",
   "devDependencies": {
     "@frp-ts/core": "^1.0.0-beta.3",
-    "@ngrx/store": "^14.3.2",
+    "@ngrx/store": "^15.0.0",
     "@preact/signals-core": "^1.2.2",
-    "@reatom/core": "^3.1.8",
+    "@reatom/core": "^3.1.10",
     "@types/node": "latest",
     "cellx": "^1.10.29",
     "effector": "^22.4.0",
     "mobx": "^6.7.0",
-    "mol_wire_lib": "^1.0.380",
+    "mol_wire_lib": "^1.0.388",
     "nanostores": "^0.7.1",
     "reatom-v1": "npm:@reatom/core@^1.1.5",
     "reatom-v2": "npm:@reatom/core@^2.0.20",
@@ -47,7 +47,7 @@
     "uvu": "^0.5.6",
     "vite": "^3.2.4",
     "whatsup": "^2.4.0",
-    "wonka": "^6.1.1"
+    "wonka": "^6.1.2"
   },
   "keywords": [
     "reactive",
