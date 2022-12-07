@@ -10,6 +10,8 @@ The charts shows median value. If you will start the bench by yourself you could
 
 The results above is a median value in percent from a fastest library for each iteration loop.
 
+> [Notes about Reatom performance](https://www.reatom.dev/#how-performant-reatom-is) 🤗
+
 ## Results
 
 ### AMD_EPYC_7B12
