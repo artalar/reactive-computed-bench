@@ -1,3 +1,4 @@
+import { Fn } from '@reatom/core'
 import { printLogs, formatLog } from './utils'
 
 async function testAggregateGrowing(count: number) {
@@ -220,10 +221,41 @@ async function testParent(count: number) {
   })
 }
 
+async function testMany(count: number) {
+  const mol_wire_lib = await import('mol_wire_lib')
+  const { $mol_wire_atom, $mol_wire_fiber } = mol_wire_lib.default
+  let resolve: Fn = () => {}
+
+  const molAtoms = Array.from(
+    { length: count },
+    (_, i) => new $mol_wire_atom(i.toString(), (next: number = 0) => next),
+  )
+
+  molAtoms.forEach(a => a.sync())
+
+  const molLogs = new Array<number>()
+  let i = 1
+  while (i++ < 100) {
+
+    const startMol = performance.now()
+    molAtoms[0]!.put(i)
+    $mol_wire_fiber.sync()
+    molLogs.push(performance.now() - startMol)
+  }
+
+  console.log(`testMany ${count}`)
+
+  printLogs({
+    $mol_wire: formatLog(molLogs),
+  })
+}
+
 ;(async () => {
-  await testAggregateGrowing(1000)
-  await testAggregateShrinking(1000)
-  await testParent(1000)
+  // await testAggregateGrowing(1000)
+  // await testAggregateShrinking(1000)
+  // await testParent(1000)
+  await testMany(10)
+  await testMany(10000)
 
   process.exit()
 })()
