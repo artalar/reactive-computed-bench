@@ -121,7 +121,7 @@ const testComputers = setupComputersTest({
 
     return (i) => entry(i)
   },
-  async 'effector (fork)'({ listener, startCreation, endCreation }) {
+  async 'effector.fork'({ listener, startCreation, endCreation }) {
     const { createEvent, createStore, combine, allSettled, fork } =
       await import('effector')
 

@@ -30,20 +30,13 @@ const Y_START = 20
 const Y_RANGE = 500
 const LABEL_HEIGHT = 16
 
-const PALETTE = [
-  '#e60049',
-  '#0bb4ff',
-  '#50e991',
-  '#e6d800',
-  '#9b19f5',
-  '#ffa300',
-  '#dc0ab4',
-  '#b3d4ff',
-  '#00bfa0',
-]
+const hsl = (i: number, length: number) => {
+  const h = Math.round((i * 360) / length) % 360
+  return `hsl(${h}, 90%, 45%)`
+}
 
 const PACKAGES = {
-  'effector (fork)': 'effector',
+  'effector.fork': 'effector',
   's.js': 's-js',
   frpts: '@frp-ts/core',
   mol: 'mol_wire_lib',
@@ -104,13 +97,14 @@ async function getChartData(results: BenchResults) {
     }
   > = {}
 
-  const arr: {
+  const arr: Array<{
     lib: string
     version: string
+    color: string
     min: number[]
     med: number[]
     max: number[]
-  }[] = []
+  }> = []
 
   const fastest = {
     min: [] as number[],
@@ -155,6 +149,8 @@ async function getChartData(results: BenchResults) {
     i++
   }
 
+  const libsNames = Object.keys(grouped).sort()
+
   for (let lib in grouped) {
     // @ts-expect-error
     const moduleName = PACKAGES[lib] || lib
@@ -171,6 +167,7 @@ async function getChartData(results: BenchResults) {
     arr.push({
       lib,
       version,
+      color: hsl(libsNames.indexOf(lib), libsNames.length),
       ...grouped[lib]!,
     })
   }
@@ -179,11 +176,11 @@ async function getChartData(results: BenchResults) {
 
   const toPoint = (v: number, i: number) => getPoint(v, fastest.med[i]!, i)
   const data = arr
-    .map(({ lib, min, med, max, version }, i) => {
+    .map(({ lib, version, color, min, med, max }) => {
       return {
         lib,
         version,
-        color: PALETTE[i % PALETTE.length],
+        color,
         min: min.map(toPoint),
         med: med.map(toPoint),
         max: max.map(toPoint),
