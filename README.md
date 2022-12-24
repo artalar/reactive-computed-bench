@@ -12,7 +12,22 @@ The results above is a median value in percent from a fastest library for each i
 
 > [Notes about Reatom performance](https://www.reatom.dev/#how-performant-reatom-is) 🤗
 
+> Run it localy to see detailed numbers (node 18 required).
+
 ## Results
+
+### AMD_EPYC_7B13
+
+![](./popular_chart_AMD_EPYC_7B13.svg)
+
+<details>
+<summary>all results</summary>
+
+![](./all_chart_AMD_EPYC_7B13.svg)
+
+</details>
+
+<!-- ### AMD_EPYC_7B13 -->
 
 ### Apple_M1
 

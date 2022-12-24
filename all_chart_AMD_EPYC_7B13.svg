@@ -1,0 +1,281 @@
+<svg id="bench-chart" viewBox="0 0 830 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    #bench-chart .grid {
+      stroke: #777777;
+      stroke-width: 1;
+    }
+
+    #bench-chart .dashed {
+      stroke: #777777;
+      opacity: 0.3;
+      stroke-width: 1;
+      stroke-dasharray: 5, 5;
+    }
+
+    #bench-chart .labels {
+      fill: #777777;
+      font-size: 13px;
+      font-family: sans-serif;
+    }
+
+    #bench-chart .x-labels {
+      text-anchor: middle;
+    }
+
+    #bench-chart .y-labels {
+      text-anchor: start;
+    }
+
+    #bench-chart .lib-label {
+      font-size: 12px;
+      font-family: sans-serif;
+      text-anchor: end;
+    }
+
+    #bench-chart .line-med {
+      stroke-width: 6;
+      opacity: 0.6;
+    }
+  </style>
+
+  <g class="grid">
+    <line x1="100" y1="520" x2="830" y2="520"></line>
+    <line x1="100" y1="520" x2="100" y2="0"></line>
+  </g>
+
+  <g class="dashed">
+    <line x1="330" y1="520" x2="330" y2="0"></line>
+    <line x1="560" y1="520" x2="560" y2="0"></line>
+    <line x1="790" y1="520" x2="790" y2="0"></line>
+
+    <line x1="100" y1="20" x2="790" y2="20"></line>
+    <line x1="100" y1="145" x2="790" y2="145"></line>
+    <line x1="100" y1="270" x2="790" y2="270"></line>
+    <line x1="100" y1="395" x2="790" y2="395"></line>
+  </g>
+
+  <g class="labels x-labels">
+    <text x="100" y="540">10</text>
+    <text x="330" y="540">100</text>
+    <text x="560" y="540">1000</text>
+    <text x="790" y="540">10000</text>
+    <text x="445" y="560">ITERATIONS</text>
+  </g>
+
+  <g class="labels y-labels">
+    <text x="795" y="23">100%</text>
+    <text x="795" y="148">75%</text>
+    <text x="795" y="273">50%</text>
+    <text x="795" y="398">25%</text>
+  </g>
+
+  <!--CONTENT_START--><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="23"
+      fill="hsl(68, 90%, 45%)"
+    >frpts 1.0.0-beta.3</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(68, 90%, 45%)" 
+      points="100,20 330,40.879092088083866 560,166.00466495972702 790,174.36196305213656"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="39.778358855779054"
+      fill="hsl(270, 90%, 45%)"
+    >spred 0.31.1</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(270, 90%, 45%)" 
+      points="100,36.778358855779054 330,20 560,20 790,66.25584639369822"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="55.778358855779054"
+      fill="hsl(225, 90%, 45%)"
+    >s-js 0.4.9</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(225, 90%, 45%)" 
+      points="100,39.20864731815097 330,28.08524660352394 560,152.93086721544316 790,20"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="91.84291392391745"
+      fill="hsl(135, 90%, 45%)"
+    >preact 1.2.2</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(135, 90%, 45%)" 
+      points="100,88.84291392391745 330,62.657428643775866 560,178.2039171219246 790,159.2291592726362"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="134.80870613451893"
+      fill="hsl(293, 90%, 45%)"
+    >usignal 0.8.9</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(293, 90%, 45%)" 
+      points="100,131.80870613451893 330,120.7325040960006 560,142.08407684642305 790,200.1236056189421"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="197.65304586260905"
+      fill="hsl(180, 90%, 45%)"
+    >reatom-v1 1.1.5</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(180, 90%, 45%)" 
+      points="100,194.65304586260905 330,161.54568579015952 560,305.6199621522599 790,294.61667006317504"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="230.41046250014256"
+      fill="hsl(248, 90%, 45%)"
+    >solid 1.6.6</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(248, 90%, 45%)" 
+      points="100,227.41046250014256 330,240.63227752178682 560,238.60346132176971 790,221.88065263239614"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="280.5101388553165"
+      fill="hsl(113, 90%, 45%)"
+    >mol 1.0.412</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(113, 90%, 45%)" 
+      points="100,277.5101388553165 330,249.751963320965 560,215.0875428178242 790,144.7720042993475"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="296.5101388553165"
+      fill="hsl(0, 90%, 45%)"
+    >cellx 1.10.29</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(0, 90%, 45%)" 
+      points="100,293.46433687501195 330,297.02010310404444 560,372.46352515320274 790,291.110798370807"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="312.5101388553165"
+      fill="hsl(158, 90%, 45%)"
+    >reatom 3.1.18</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(158, 90%, 45%)" 
+      points="100,298.63773048460394 330,286.511971600018 560,332.2899658420215 790,328.70975999557214"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="339.56365095507755"
+      fill="hsl(315, 90%, 45%)"
+    >whatsup 2.4.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(315, 90%, 45%)" 
+      points="100,336.56365095507755 330,352.8028565365979 560,387.1078896554085 790,378.51622906443015"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="390.13611588240724"
+      fill="hsl(90, 90%, 45%)"
+    >mobx 6.7.0</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(90, 90%, 45%)" 
+      points="100,387.13611588240724 330,369.1349247843628 560,423.9905211875009 790,412.93116187283823"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="406.13611588240724"
+      fill="hsl(203, 90%, 45%)"
+    >reatom-v2 2.0.22</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(203, 90%, 45%)" 
+      points="100,398.61325105204423 330,396.9288750059412 560,463.1379608232163 790,462.21588835790874"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="428.7112082511486"
+      fill="hsl(338, 90%, 45%)"
+    >wonka 6.1.2</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(338, 90%, 45%)" 
+      points="100,425.7112082511486 330,385.66703242383755 560,444.9189160942431 790,451.6067874491854"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="444.7112082511486"
+      fill="hsl(23, 90%, 45%)"
+    >effector 22.4.1</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(23, 90%, 45%)" 
+      points="100,440.0638396350728 330,254.79323586550288 560,397.8894865576935 790,410.0745058125666"
+    ></polyline>
+  </g><g>
+    <text
+      class="lib-label"
+      x="95"
+      y="464.12142473023164"
+      fill="hsl(45, 90%, 45%)"
+    >effector.fork 22.4.1</text>
+    <polyline
+      class="line-med"
+      fill="none"
+      stroke="hsl(45, 90%, 45%)" 
+      points="100,461.12142473023164 330,379.4757315063458 560,453.0209482940261 790,454.37388294683194"
+    ></polyline>
+  </g><!--CONTENT_END-->
+</svg>
