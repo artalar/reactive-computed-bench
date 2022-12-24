@@ -14,14 +14,15 @@ The results above is a median value in percent from a fastest library for each i
 
 ## Results
 
-### AMD_EPYC_7B13
-
-![](./chart_AMD_EPYC_7B13.svg)
-
-<!-- ### AMD_EPYC_7B13 -->
-
 ### Apple_M1
 
-![](./chart_Apple_M1.svg)
+![](./popular_chart_Apple_M1.svg)
+
+<details>
+<summary>all results</summary>
+
+![](./all_chart_Apple_M1.svg)
+
+</details>
 
 <!-- ### Apple_M1 -->

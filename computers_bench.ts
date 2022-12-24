@@ -39,6 +39,7 @@ const testComputers = setupComputersTest({
   //     let input: any, res: any
   //     return (i: any) => (i === input ? res : (res = cb((input = i))))
   //   }
+
   //   startCreation()
 
   //   const entry = createSelector((i = 0) => i)
@@ -213,20 +214,21 @@ const testComputers = setupComputersTest({
     return (i) => (proxy.entry = i)
   },
   async mol({ listener, startCreation, endCreation }) {
-    const mol_wire_lib = await import('mol_wire_lib')
-    const { $mol_wire_atom } = mol_wire_lib.default
+    const {
+      default: { $mol_wire_atom: Atom },
+    } = await import('mol_wire_lib')
 
     startCreation()
 
-    const entry = new $mol_wire_atom('entry', (next: number = 0) => next)
-    const a = new $mol_wire_atom('mA', () => entry.sync())
-    const b = new $mol_wire_atom('mB', () => a.sync() + 1)
-    const c = new $mol_wire_atom('mC', () => a.sync() + 1)
-    const d = new $mol_wire_atom('mD', () => b.sync() + c.sync())
-    const e = new $mol_wire_atom('mE', () => d.sync() + 1)
-    const f = new $mol_wire_atom('mF', () => d.sync() + e.sync())
-    const g = new $mol_wire_atom('mG', () => d.sync() + e.sync())
-    const h = new $mol_wire_atom('mH', () => f.sync() + g.sync())
+    const entry = new Atom('entry', (next: number = 0) => next)
+    const a = new Atom('mA', () => entry.sync())
+    const b = new Atom('mB', () => a.sync() + 1)
+    const c = new Atom('mC', () => a.sync() + 1)
+    const d = new Atom('mD', () => b.sync() + c.sync())
+    const e = new Atom('mE', () => d.sync() + 1)
+    const f = new Atom('mF', () => d.sync() + e.sync())
+    const g = new Atom('mG', () => d.sync() + e.sync())
+    const h = new Atom('mH', () => f.sync() + g.sync())
 
     listener(h.sync())
 
@@ -238,6 +240,7 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
+  // https://github.com/nanostores/nanostores/issues/134
   // async nanostore({ listener, startCreation, endCreation }) {
   //   const { atom, computed } = await import('nanostores')
 
@@ -374,7 +377,7 @@ const testComputers = setupComputersTest({
 
     return (i) => update(i)
   },
-  async 's.js'({ listener, startCreation, endCreation }) {
+  async 's-js'({ listener, startCreation, endCreation }) {
     const { default: S } = await import('s-js')
 
     startCreation()
@@ -578,7 +581,7 @@ function setupComputersTest(tests: Rec<Setup>) {
             testsList.map(({ name, ref }) => [name, ref.value]),
           ),
         )
-        return
+        process.exit(1)
       }
 
       await new Promise((resolve) => setTimeout(resolve, 0))
