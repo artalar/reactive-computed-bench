@@ -514,8 +514,7 @@ const testComputers = setupComputersTest({
     const g = act(() => d() + e())
     const h = act(() => f() + g())
 
-    const effect = act(() => listener(h()))
-    effect()
+    h.subscribe(listener)
 
     endCreation()
 
