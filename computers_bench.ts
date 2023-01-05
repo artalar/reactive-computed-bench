@@ -423,6 +423,27 @@ const testComputers = setupComputersTest({
 
     return (i) => (entry.value = i)
   },
+  async '@webreflection/signal'({ listener, startCreation, endCreation }) {
+    const { signal, computed, effect } = await import('@webreflection/signal')
+
+    startCreation()
+
+    const entry = signal(0)
+    const a = computed(() => entry.value)
+    const b = computed(() => a.value + 1)
+    const c = computed(() => a.value + 1)
+    const d = computed(() => b.value + c.value)
+    const e = computed(() => d.value + 1)
+    const f = computed(() => d.value + e.value)
+    const g = computed(() => d.value + e.value)
+    const h = computed(() => f.value + g.value)
+
+    effect(() => listener(h.value))
+
+    endCreation()
+
+    return (i) => (entry.value = i)
+  },
   async whatsup({ listener, startCreation, endCreation }) {
     const { observable, computed, autorun } = await import('whatsup')
 
