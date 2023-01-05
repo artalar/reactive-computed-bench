@@ -499,6 +499,28 @@ const testComputers = setupComputersTest({
 
     return (i) => entry.next(i)
   },
+  async '@artalar/act'({ listener, startCreation, endCreation }) {
+    const { act } = await import('@artalar/act')
+
+    startCreation()
+
+    const entry = act(0)
+    const a = act(() => entry())
+    const b = act(() => a() + 1)
+    const c = act(() => a() + 1)
+    const d = act(() => b() + c())
+    const e = act(() => d() + 1)
+    const f = act(() => d() + e())
+    const g = act(() => d() + e())
+    const h = act(() => f() + g())
+
+    const effect = act(() => listener(h()))
+    effect()
+
+    endCreation()
+
+    return entry
+  },
 })
 
 function setupComputersTest(tests: Rec<Setup>) {
