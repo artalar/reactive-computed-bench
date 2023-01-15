@@ -539,7 +539,10 @@ const testComputers = setupComputersTest({
 
     endCreation()
 
-    return entry
+    return (i) => {
+      entry(i)
+      act.notify()
+    }
   },
 })
 
