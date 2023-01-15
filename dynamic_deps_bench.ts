@@ -10,9 +10,12 @@ async function testAggregateGrowing(count: number) {
   const { observable, computed, autorun, configure } = await import('mobx')
   configure({ enforceActions: 'never' })
 
+  const { act } = await import('@artalar/act')
+
   const molAtoms = [new $mol_wire_atom(`0`, (next: number = 0) => next)]
   const reAtoms = [atom(0, `${0}`)]
   const mobxAtoms = [observable.box(0, { name: `${0}` })]
+  const actAtoms = [act(0)]
 
   const molAtom = new $mol_wire_atom(`sum`, () =>
     molAtoms.reduce((sum, atom) => sum + atom.sync(), 0),
@@ -25,15 +28,18 @@ async function testAggregateGrowing(count: number) {
     () => mobxAtoms.reduce((sum, atom) => sum + atom.get(), 0),
     { name: `sum` },
   )
+  const actAtom = act(() => actAtoms.reduce((sum, a) => sum + a(), 0))
   const ctx = createCtx()
 
   ctx.subscribe(reAtom, () => {})
   molAtom.sync()
   autorun(() => mobxAtom.get())
+  actAtom.subscribe(() => {})
 
   const reatomLogs = new Array<number>()
   const molLogs = new Array<number>()
   const mobxLogs = new Array<number>()
+  const actLogs = new Array<number>()
   let i = 1
   while (i++ < count) {
     const startReatom = performance.now()
@@ -52,10 +58,19 @@ async function testAggregateGrowing(count: number) {
     mobxAtoms.at(-2)!.set(i)
     mobxLogs.push(performance.now() - startMobx)
 
+    const startAct = performance.now()
+    actAtoms.push(act(i))
+    actAtoms.at(-2)!(i)
+    act.notify()
+    actLogs.push(performance.now() - startAct)
+
     await new Promise((resolve) => setTimeout(resolve, 0))
   }
 
-  if (new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get()]).size > 1) {
+  if (
+    new Set([molAtom.sync(), ctx.get(reAtom), mobxAtom.get(), actAtom()]).size >
+    1
+  ) {
     throw new Error(
       'Mismatch: ' +
         JSON.stringify({
@@ -72,6 +87,7 @@ async function testAggregateGrowing(count: number) {
     reatom: formatLog(reatomLogs),
     $mol_wire: formatLog(molLogs),
     mobx: formatLog(mobxLogs),
+    act: formatLog(actLogs),
   })
 }
 
@@ -231,12 +247,11 @@ async function testMany(count: number) {
     (_, i) => new $mol_wire_atom(i.toString(), (next: number = 0) => next),
   )
 
-  molAtoms.forEach(a => a.sync())
+  molAtoms.forEach((a) => a.sync())
 
   const molLogs = new Array<number>()
   let i = 1
   while (i++ < 100) {
-
     const startMol = performance.now()
     molAtoms[0]!.put(i)
     $mol_wire_fiber.sync()
@@ -251,11 +266,11 @@ async function testMany(count: number) {
 }
 
 ;(async () => {
-  // await testAggregateGrowing(1000)
-  // await testAggregateShrinking(1000)
-  // await testParent(1000)
-  await testMany(10)
-  await testMany(10000)
+  await testAggregateGrowing(1000)
+  await testAggregateShrinking(1000)
+  await testParent(1000)
+  // await testMany(10)
+  // await testMany(10000)
 
   process.exit()
 })()
