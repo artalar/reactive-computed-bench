@@ -240,28 +240,27 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
-  // https://github.com/nanostores/nanostores/issues/134
-  // async nanostore({ listener, startCreation, endCreation }) {
-  //   const { atom, computed } = await import('nanostores')
+  async nanostores({ listener, startCreation, endCreation }) {
+    const { atom, computed } = await import('nanostores')
 
-  //   startCreation()
+    startCreation()
 
-  //   const entry = atom<number>(0)
-  //   const a = computed(entry, (entry) => entry + 1)
-  //   const b = computed(a, (a) => a + 1)
-  //   const c = computed(a, (a) => a + 1)
-  //   const d = computed([b, c], (b, c) => b + c)
-  //   const e = computed(d, (d) => d + 1)
-  //   const f = computed([d, e], (d, e) => d + e)
-  //   const g = computed([d, e], (d, e) => d + e)
-  //   const h = computed([f, g], (h1, h2) => h1 + h2)
+    const entry = atom<number>(0)
+    const a = computed(entry, (entry) => entry)
+    const b = computed(a, (a) => a + 1)
+    const c = computed(a, (a) => a + 1)
+    const d = computed([b, c], (b, c) => b + c)
+    const e = computed(d, (d) => d + 1)
+    const f = computed([d, e], (d, e) => d + e)
+    const g = computed([d, e], (d, e) => d + e)
+    const h = computed([f, g], (h1, h2) => h1 + h2)
 
-  //   h.subscribe(listener)
+    h.subscribe(listener)
 
-  //   endCreation()
+    endCreation()
 
-  //   return (i) => entry.set(i)
-  // },
+    return (i) => entry.set(i)
+  },
   async preact({ listener, startCreation, endCreation }) {
     const { signal, computed, effect } = await import('@preact/signals-core')
 
