@@ -242,10 +242,10 @@ const testComputers = setupComputersTest({
   },
   async '@krulod/wire'({ listener, startCreation, endCreation }) {
     const { Atom } = await import('@krulod/wire')
+    
+    startCreation()
   
-	  startCreation()
-  
-	  const entry = new Atom('entry', (next: number = 0) => next)
+	  const entry = new Atom('entry', () => 0)
 	  const a = new Atom('mA', () => entry.pull())
 	  const b = new Atom('mB', () => a.pull() + 1)
 	  const c = new Atom('mC', () => a.pull() + 1)
