@@ -240,6 +240,30 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
+  async '@krulod/wire'({ listener, startCreation, endCreation }) {
+    const { Atom } = await import('@krulod/wire')
+    
+    startCreation()
+  
+	const entry = new Atom('entry', () => 0)
+	const a = new Atom('mA', () => entry.pull())
+	const b = new Atom('mB', () => a.pull() + 1)
+	const c = new Atom('mC', () => a.pull() + 1)
+	const d = new Atom('mD', () => b.pull() + c.pull())
+	const e = new Atom('mE', () => d.pull() + 1)
+	const f = new Atom('mF', () => d.pull() + e.pull())
+	const g = new Atom('mG', () => d.pull() + e.pull())
+	const h = new Atom('mH', () => f.pull() + g.pull())
+  
+	listener(h.pull())
+  
+	endCreation()
+  
+    return (i) => {
+      entry.put(i)
+      listener(h.pull())
+    }
+  },
   async nanostores({ listener, startCreation, endCreation }) {
     const { atom, computed } = await import('nanostores')
 
