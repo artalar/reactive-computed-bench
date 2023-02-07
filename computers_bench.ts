@@ -240,30 +240,30 @@ const testComputers = setupComputersTest({
       listener(h.sync())
     }
   },
-  async '@krulod/wire'({ listener, startCreation, endCreation }) {
-    const { Atom } = await import('@krulod/wire')
+  // async '@krulod/wire'({ listener, startCreation, endCreation }) {
+  //   const { Atom } = await import('@krulod/wire')
     
-    startCreation()
+  //   startCreation()
   
-	const entry = new Atom('entry', () => 0)
-	const a = new Atom('mA', () => entry.pull())
-	const b = new Atom('mB', () => a.pull() + 1)
-	const c = new Atom('mC', () => a.pull() + 1)
-	const d = new Atom('mD', () => b.pull() + c.pull())
-	const e = new Atom('mE', () => d.pull() + 1)
-	const f = new Atom('mF', () => d.pull() + e.pull())
-	const g = new Atom('mG', () => d.pull() + e.pull())
-	const h = new Atom('mH', () => f.pull() + g.pull())
+	// const entry = new Atom('entry', () => 0)
+	// const a = new Atom('mA', () => entry.pull())
+	// const b = new Atom('mB', () => a.pull() + 1)
+	// const c = new Atom('mC', () => a.pull() + 1)
+	// const d = new Atom('mD', () => b.pull() + c.pull())
+	// const e = new Atom('mE', () => d.pull() + 1)
+	// const f = new Atom('mF', () => d.pull() + e.pull())
+	// const g = new Atom('mG', () => d.pull() + e.pull())
+	// const h = new Atom('mH', () => f.pull() + g.pull())
   
-	listener(h.pull())
+	// listener(h.pull())
   
-	endCreation()
+	// endCreation()
   
-    return (i) => {
-      entry.put(i)
-      listener(h.pull())
-    }
-  },
+  //   return (i) => {
+  //     entry.put(i)
+  //     listener(h.pull())
+  //   }
+  // },
   async nanostores({ listener, startCreation, endCreation }) {
     const { atom, computed } = await import('nanostores')
 
@@ -306,53 +306,53 @@ const testComputers = setupComputersTest({
 
     return (i) => (entry.value = i)
   },
-  async 'reatom-v1'({ listener, startCreation, endCreation }) {
-    const { declareAction, declareAtom, map, combine, createStore } =
-      await import('reatom-v1')
+  // async 'reatom-v1'({ listener, startCreation, endCreation }) {
+  //   const { declareAction, declareAtom, map, combine, createStore } =
+  //     await import('reatom-v1')
 
-    startCreation()
+  //   startCreation()
 
-    const entry = declareAction<number>()
-    const a = declareAtom(0, (on) => [on(entry, (state, v) => v)])
-    const b = map(a, (v) => v + 1)
-    const c = map(a, (v) => v + 1)
-    const d = map(combine([b, c]), ([v1, v2]) => v1 + v2)
-    const e = map(d, (v) => v + 1)
-    const f = map(combine([d, e]), ([v1, v2]) => v1 + v2)
-    const g = map(combine([d, e]), ([v1, v2]) => v1 + v2)
-    const h = map(combine([f, g]), ([v1, v2]) => v1 + v2)
+  //   const entry = declareAction<number>()
+  //   const a = declareAtom(0, (on) => [on(entry, (state, v) => v)])
+  //   const b = map(a, (v) => v + 1)
+  //   const c = map(a, (v) => v + 1)
+  //   const d = map(combine([b, c]), ([v1, v2]) => v1 + v2)
+  //   const e = map(d, (v) => v + 1)
+  //   const f = map(combine([d, e]), ([v1, v2]) => v1 + v2)
+  //   const g = map(combine([d, e]), ([v1, v2]) => v1 + v2)
+  //   const h = map(combine([f, g]), ([v1, v2]) => v1 + v2)
 
-    const store = createStore()
-    store.subscribe(h, listener)
+  //   const store = createStore()
+  //   store.subscribe(h, listener)
 
-    endCreation()
+  //   endCreation()
 
-    return (i) => store.dispatch(entry(i))
-  },
-  async 'reatom-v2'({ listener, startCreation, endCreation }) {
-    const { createAtom, createStore } = await import('reatom-v2')
+  //   return (i) => store.dispatch(entry(i))
+  // },
+  // async 'reatom-v2'({ listener, startCreation, endCreation }) {
+  //   const { createAtom, createStore } = await import('reatom-v2')
 
-    startCreation()
+  //   startCreation()
 
-    const a = createAtom({ entry: (v: number) => v }, (track, state = 0) => {
-      track.onAction('entry', (v) => (state = v))
-      return state
-    })
-    const b = createAtom({ a }, (track) => track.get('a') + 1)
-    const c = createAtom({ a }, (track) => track.get('a') + 1)
-    const d = createAtom({ b, c }, (track) => track.get('b') + track.get('c'))
-    const e = createAtom({ d }, (track) => track.get('d') + 1)
-    const f = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
-    const g = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
-    const h = createAtom({ f, g }, (track) => track.get('f') + track.get('g'))
+  //   const a = createAtom({ entry: (v: number) => v }, (track, state = 0) => {
+  //     track.onAction('entry', (v) => (state = v))
+  //     return state
+  //   })
+  //   const b = createAtom({ a }, (track) => track.get('a') + 1)
+  //   const c = createAtom({ a }, (track) => track.get('a') + 1)
+  //   const d = createAtom({ b, c }, (track) => track.get('b') + track.get('c'))
+  //   const e = createAtom({ d }, (track) => track.get('d') + 1)
+  //   const f = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
+  //   const g = createAtom({ d, e }, (track) => track.get('d') + track.get('e'))
+  //   const h = createAtom({ f, g }, (track) => track.get('f') + track.get('g'))
 
-    const store = createStore()
-    store.subscribe(h, listener)
+  //   const store = createStore()
+  //   store.subscribe(h, listener)
 
-    endCreation()
+  //   endCreation()
 
-    return (i) => store.dispatch(a.entry(i))
-  },
+  //   return (i) => store.dispatch(a.entry(i))
+  // },
   async reatom({ listener, startCreation, endCreation }) {
     const { action, atom, createCtx } = await import('@reatom/core')
 
