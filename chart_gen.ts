@@ -49,6 +49,8 @@ const PACKAGE_NAMES: Rec<string> = {
   preact: '@preact/signals-core',
   reatom: '@reatom/core',
   solid: 'solid-js',
+  'rx-effects': 'rx-effects',
+  'rx-effects (explicit)': 'rx-effects',
 }
 
 export async function genChart(allResults: BenchResults) {

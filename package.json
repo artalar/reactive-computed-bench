@@ -39,6 +39,7 @@
     "nanostores": "^0.7.3",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
+    "rx-effects": "2.0.0-beta.4",
     "s-js": "^0.4.9",
     "solid-js": "^1.6.10",
     "spred": "^0.32.2",
