@@ -593,32 +593,6 @@ const testComputers = setupComputersTest({
       entry.notify();
     }
   },
-
-  async 'rx-effects (explicit)'({listener, startCreation, endCreation}) {
-    const { createStore, compute } = await import('rx-effects')
-
-    startCreation()
-
-    const entry = createStore(0);
-
-    const a = compute(() => entry.get(), [entry]);
-    const b = compute(() => a.get() + 1, [a]);
-    const c = compute(() => a.get() + 1, [a]);
-    const d = compute(() => b.get() + c.get(), [b, c]);
-    const e = compute(() => d.get() + 1, [d]);
-    const f = compute(() => d.get() + e.get(), [d, e]);
-    const g = compute(() => d.get() + e.get(), [d, e]);
-    const h = compute(() => f.get() + g.get(), [f, g]);
-
-    h.value$.subscribe(listener)
-
-    endCreation()
-
-    return (i) => {
-      entry.set(i);
-      entry.notify();
-    }
-  },
 })
 
 function setupComputersTest(tests: Rec<Setup>) {
