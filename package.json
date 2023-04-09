@@ -40,6 +40,7 @@
     "react": "^18.2.0",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
+    "rx-effects": "2.0.0-beta.5",
     "s-js": "^0.4.9",
     "solid-js": "^1.7.3",
     "spred": "^0.32.2",
