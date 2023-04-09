@@ -26,7 +26,6 @@
   "devDependencies": {
     "@artalar/act": "^3.2.1",
     "@frp-ts/core": "^1.0.0-beta.3",
-    "@krulod/wire": "^1.0.16",
     "@ngrx/store": "^15.4.0",
     "@preact/signals-core": "^1.2.3",
     "@reatom/core": "^3.2.0",
@@ -38,6 +37,7 @@
     "mobx": "^6.9.0",
     "mol_wire_lib": "^1.0.548",
     "nanostores": "^0.7.4",
+    "react": "^18.2.0",
     "redux": "^4.2.1",
     "reselect": "^4.1.7",
     "s-js": "^0.4.9",
