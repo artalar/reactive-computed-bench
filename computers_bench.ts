@@ -172,6 +172,28 @@ const testComputers = setupComputersTest({
 
     return (i) => entry.set(i)
   },
+  async jotai({ listener, startCreation, endCreation }) {
+    const { atom, createStore } = await import('jotai')
+
+    startCreation()
+
+    const entry = atom(0)
+    const a = atom((get) => get(entry))
+    const b = atom((get) => get(a) + 1)
+    const c = atom((get) => get(a) + 1)
+    const d = atom((get) => get(b) + get(c))
+    const e = atom((get) => get(d) + 1)
+    const f = atom((get) => get(d) + get(e))
+    const g = atom((get) => get(d) + get(e))
+    const h = atom((get) => get(f) + get(g))
+
+    const store = createStore()
+    store.sub(h, () => listener(store.get(h)))
+
+    endCreation()
+
+    return (i) => store.set(entry, i)
+  },
   async mobx({ listener, startCreation, endCreation }) {
     const { makeAutoObservable, autorun, configure } = await import('mobx')
 
@@ -242,23 +264,23 @@ const testComputers = setupComputersTest({
   },
   // async '@krulod/wire'({ listener, startCreation, endCreation }) {
   //   const { Atom } = await import('@krulod/wire')
-    
+
   //   startCreation()
-  
-	// const entry = new Atom('entry', () => 0)
-	// const a = new Atom('mA', () => entry.pull())
-	// const b = new Atom('mB', () => a.pull() + 1)
-	// const c = new Atom('mC', () => a.pull() + 1)
-	// const d = new Atom('mD', () => b.pull() + c.pull())
-	// const e = new Atom('mE', () => d.pull() + 1)
-	// const f = new Atom('mF', () => d.pull() + e.pull())
-	// const g = new Atom('mG', () => d.pull() + e.pull())
-	// const h = new Atom('mH', () => f.pull() + g.pull())
-  
-	// listener(h.pull())
-  
-	// endCreation()
-  
+
+  // const entry = new Atom('entry', () => 0)
+  // const a = new Atom('mA', () => entry.pull())
+  // const b = new Atom('mB', () => a.pull() + 1)
+  // const c = new Atom('mC', () => a.pull() + 1)
+  // const d = new Atom('mD', () => b.pull() + c.pull())
+  // const e = new Atom('mE', () => d.pull() + 1)
+  // const f = new Atom('mF', () => d.pull() + e.pull())
+  // const g = new Atom('mG', () => d.pull() + e.pull())
+  // const h = new Atom('mH', () => f.pull() + g.pull())
+
+  // listener(h.pull())
+
+  // endCreation()
+
   //   return (i) => {
   //     entry.put(i)
   //     listener(h.pull())
@@ -354,7 +376,7 @@ const testComputers = setupComputersTest({
   //   return (i) => store.dispatch(a.entry(i))
   // },
   async reatom({ listener, startCreation, endCreation }) {
-    const { action, atom, createCtx } = await import('@reatom/core')
+    const { atom, createCtx } = await import('@reatom/core')
 
     startCreation()
 
