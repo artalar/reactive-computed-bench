@@ -57,25 +57,25 @@ const testComputers = setupComputersTest({
   //   return (i) => listener(h(i))
   // },
   async spred({ listener, startCreation, endCreation }) {
-    const { writable, computed } = await import('spred')
+    const { signal } = await import('@spred/core')
 
     startCreation()
 
-    const entry = writable(0)
-    const a = computed(() => entry())
-    const b = computed(() => a() + 1)
-    const c = computed(() => a() + 1)
-    const d = computed(() => b() + c())
-    const e = computed(() => d() + 1)
-    const f = computed(() => d() + e())
-    const g = computed(() => d() + e())
-    const h = computed(() => f() + g())
+    const entry = signal(0)
+    const a = signal(() => entry.get())
+    const b = signal(() => a.get() + 1)
+    const c = signal(() => a.get() + 1)
+    const d = signal(() => b.get() + c.get())
+    const e = signal(() => d.get() + 1)
+    const f = signal(() => d.get() + e.get())
+    const g = signal(() => d.get() + e.get())
+    const h = signal(() => f.get() + g.get())
 
     h.subscribe(listener)
 
     endCreation()
 
-    return (i) => entry(i)
+    return (i) => entry.set(i)
   },
   async cellx({ listener, startCreation, endCreation }) {
     const { cellx, Cell } = await import('cellx')

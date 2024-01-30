@@ -49,6 +49,7 @@ const PACKAGE_NAMES: Rec<string> = {
   preact: '@preact/signals-core',
   reatom: '@reatom/core',
   solid: 'solid-js',
+  spred: '@spred/core',
 }
 
 export async function genChart(allResults: BenchResults) {
