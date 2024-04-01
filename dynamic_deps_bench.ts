@@ -1,4 +1,5 @@
-import { printLogs, formatLog } from './utils'
+import { forEach } from 'wonka'
+import { printLogs, formatLog, POSITION_KEY } from './utils'
 
 async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
   const mol_wire_lib = await import('mol_wire_lib')
@@ -106,11 +107,11 @@ async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
     `Median of sum calc of reactive nodes in list from 1 to ${count} (with "${method}")`,
   )
 
-  printLogs({
+  return printLogs({
     reatom: formatLog(reatomLogs),
     $mol_wire: formatLog(molLogs),
     mobx: formatLog(mobxLogs),
-    act: formatLog(actLogs),
+    // act: formatLog(actLogs),
     V4: formatLog(V4Logs),
   })
 }
@@ -204,11 +205,12 @@ async function testAggregateShrinking(count: number, method: 'pop' | 'shift') {
     `Median of sum calc of reactive nodes in list from ${count} to 1 (with "${method}")`,
   )
 
-  printLogs({
+  return printLogs({
     reatom: formatLog(reatomLogs),
-    V4: formatLog(V4Logs),
     $mol_wire: formatLog(molLogs),
     mobx: formatLog(mobxLogs),
+    // act: formatLog(actLogs),
+    V4: formatLog(V4Logs),
   })
 }
 
@@ -294,22 +296,38 @@ async function testParent(count: number) {
 
   console.log(`Median of update 1 node with ${count} reactive children`)
 
-  printLogs({
+  return printLogs({
     reatom: formatLog(reatomLogs),
-    V4: formatLog(V4Logs),
     $mol_wire: formatLog(molLogs),
     mobx: formatLog(mobxLogs),
+    // act: formatLog(actLogs),
+    V4: formatLog(V4Logs),
   })
 }
 
 ;(async () => {
-  for (const i of [10, 100, 1000]) {
-    await testAggregateGrowing(i, 'push')
-    await testAggregateGrowing(i, 'unshift')
-    await testAggregateShrinking(i, 'pop')
-    await testAggregateShrinking(i, 'shift')
-    await testParent(i)
+  const subscribers = [10, 1000]
+  for (const i of subscribers) {
+    var results = [
+      await testAggregateGrowing(i, 'push'),
+      await testAggregateGrowing(i, 'unshift'),
+      await testAggregateShrinking(i, 'pop'),
+      await testAggregateShrinking(i, 'shift'),
+      await testParent(i),
+    ]
   }
+
+  console.log('\nAVERAGE for', subscribers.join(','), 'subscribers')
+
+  Object.keys(results![0])
+    .map((name) => ({
+      name,
+      pos:
+        results!.reduce((acc, log) => +log[name][POSITION_KEY] + acc, 0) /
+        results!.length,
+    }))
+    .sort((a, b) => a.pos - b.pos)
+    .forEach(({ name, pos }) => console.log(pos, name))
 
   process.exit()
 })()

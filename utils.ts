@@ -1,5 +1,7 @@
 export type Rec<T = any> = Record<string, T>
 
+export const POSITION_KEY = 'pos %'
+
 export function printLogs(results: Rec<ReturnType<typeof formatLog>>) {
   const medFastest = Math.min(...Object.values(results).map(({ med }) => med))
 
@@ -7,7 +9,7 @@ export function printLogs(results: Rec<ReturnType<typeof formatLog>>) {
     .sort(([, { med: a }], [, { med: b }]) => a - b)
     .reduce((acc, [name, { min, med, max }]) => {
       acc[name] = {
-        'pos %': ((medFastest / med) * 100).toFixed(0),
+        [POSITION_KEY]: ((medFastest / med) * 100).toFixed(0),
         'avg ms': med.toFixed(3),
         'min ms': min.toFixed(5),
         'med ms': med.toFixed(5),
@@ -17,6 +19,8 @@ export function printLogs(results: Rec<ReturnType<typeof formatLog>>) {
     }, {} as Rec<Rec>)
 
   console.table(tabledData)
+
+  return tabledData
 }
 
 export function formatPercent(n = 0) {
