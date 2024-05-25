@@ -62,20 +62,20 @@ const testComputers = setupComputersTest({
     startCreation()
 
     const entry = writable(0)
-    const a = computed(() => entry())
-    const b = computed(() => a() + 1)
-    const c = computed(() => a() + 1)
-    const d = computed(() => b() + c())
-    const e = computed(() => d() + 1)
-    const f = computed(() => d() + e())
-    const g = computed(() => d() + e())
-    const h = computed(() => f() + g())
+    const a = computed(() => entry.get())
+    const b = computed(() => a.get() + 1)
+    const c = computed(() => a.get() + 1)
+    const d = computed(() => b.get() + c.get())
+    const e = computed(() => d.get() + 1)
+    const f = computed(() => d.get() + e.get())
+    const g = computed(() => d.get() + e.get())
+    const h = computed(() => f.get() + g.get())
 
     h.subscribe(listener)
 
     endCreation()
 
-    return (i) => entry(i)
+    return (i) => entry.set(i)
   },
   async cellx({ listener, startCreation, endCreation }) {
     const { cellx, Cell } = await import('cellx')
@@ -397,6 +397,34 @@ const testComputers = setupComputersTest({
 
     return (i) => entry(ctx, i)
   },
+  // async v4({ listener, startCreation, endCreation }) {
+  //   const { atom, effect, AsyncContext, wrap, notify, clearDefaults } =
+  //     await import('../../reatom4/packages/core/build')
+
+  //   startCreation()
+
+  //   clearDefaults()
+
+  //   const entry = atom(0, 'entry')
+  //   const a = atom(() => entry(), 'a')
+  //   const b = atom(() => a() + 1, 'b')
+  //   const c = atom(() => a() + 1, 'c')
+  //   const d = atom(() => b() + c(), 'd')
+  //   const e = atom(() => d() + 1, 'e')
+  //   const f = atom(() => d() + e(), 'f')
+  //   const g = atom(() => d() + e(), 'g')
+  //   const h = atom(() => f() + g(), 'h')
+
+  //   const root = AsyncContext.Snapshot.createRoot().frame
+  //   effect(() => listener(h())).run(root)
+
+  //   endCreation()
+
+  //   return wrap((v) => {
+  //     entry(v)
+  //     notify()
+  //   }, root)
+  // },
   async solid({ listener, startCreation, endCreation }) {
     const { createSignal, createMemo, createEffect } = await import(
       // FIXME

@@ -36,10 +36,12 @@ async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
     { name: `sum` },
   )
   const actAtom = act(() => actAtoms.reduce((sum, a) => sum + a(), 0))
+
   const ctx = createCtx()
+  const V4Root = V4.AsyncContext.Snapshot.createRoot()
 
   ctx.subscribe(reAtom, () => {})
-  V4.effect(() => V4Atom()).run()
+  V4.effect(() => V4Atom()).run(V4Root.frame)
   molAtom.sync()
   autorun(() => mobxAtom.get())
   actAtom.subscribe(() => {})
@@ -68,9 +70,11 @@ async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
     mobxLogs.push(performance.now() - startMobx)
 
     const startV4 = performance.now()
-    V4Atoms[method](V4.atom(i))
-    V4Atoms.at(-2)!(i)
-    V4.notify()
+    V4Root.run(() => {
+      V4Atoms[method](V4.atom(i))
+      V4Atoms.at(-2)!(i)
+      V4.notify()
+    })
     V4Logs.push(performance.now() - startV4)
 
     const startAct = performance.now()
@@ -88,7 +92,7 @@ async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
       ctx.get(reAtom),
       mobxAtom.get(),
       actAtom(),
-      V4Atom(),
+      V4Root.run(V4Atom),
     ]).size > 1
   ) {
     throw new Error(
@@ -98,7 +102,7 @@ async function testAggregateGrowing(count: number, method: 'push' | 'unshift') {
           reatom: ctx.get(reAtom),
           mobx: mobxAtom.get(),
           act: actAtom(),
-          V4: V4Atom(),
+          V4: V4Root.run(V4Atom),
         }),
     )
   }
@@ -148,14 +152,16 @@ async function testAggregateShrinking(count: number, method: 'pop' | 'shift') {
     () => V4Atoms.reduce((sum, atom) => sum + atom(), 0),
     `sum`,
   )
-  const ctx = createCtx()
   const mobxAtom = computed(
     () => mobxAtoms.reduce((sum, atom) => sum + atom.get(), 0),
     { name: `sum` },
   )
 
+  const ctx = createCtx()
+  const V4Root = V4.AsyncContext.Snapshot.createRoot()
+
   ctx.subscribe(reAtom, () => {})
-  V4.effect(() => V4Atom()).run()
+  V4.effect(() => V4Atom()).run(V4Root.frame)
   molAtom.sync()
   autorun(() => mobxAtom.get())
 
@@ -170,8 +176,10 @@ async function testAggregateShrinking(count: number, method: 'pop' | 'shift') {
     reatomLogs.push(performance.now() - startReatom)
 
     const startV4 = performance.now()
-    V4Atoms[method]()!(i)
-    V4.notify()
+    V4Root.run(() => {
+      V4Atoms[method]()!(i)
+      V4.notify()
+    })
     V4Logs.push(performance.now() - startV4)
 
     const startMol = performance.now()
@@ -187,15 +195,19 @@ async function testAggregateShrinking(count: number, method: 'pop' | 'shift') {
   }
 
   if (
-    new Set([molAtom.sync(), ctx.get(reAtom), V4Atom(), mobxAtom.get()]).size >
-    1
+    new Set([
+      molAtom.sync(),
+      ctx.get(reAtom),
+      V4Root.run(V4Atom),
+      mobxAtom.get(),
+    ]).size > 1
   ) {
     throw new Error(
       'Mismatch: ' +
         JSON.stringify({
           mol: molAtom.sync(),
           reatom: ctx.get(reAtom),
-          V4: V4Atom(),
+          V4: V4Root.run(V4Atom),
           mobx: mobxAtom.get(),
         }),
     )
@@ -229,8 +241,10 @@ async function testParent(count: number) {
   const molAtoms = []
   const reAtom = atom(0, `${0}`)
   const V4Atom = V4.atom(0, `${0}`)
-  const ctx = createCtx()
   const mobxAtom = observable.box(0, { name: `${0}` })
+
+  const ctx = createCtx()
+  const V4Root = V4.AsyncContext.Snapshot.createRoot()
 
   {
     let i = count
@@ -245,7 +259,7 @@ async function testParent(count: number) {
       )
 
       const V4DepAtom = V4.atom(() => V4Atom())
-      V4.effect(() => V4DepAtom()).run()
+      V4.effect(() => V4DepAtom()).run(V4Root.frame)
 
       const mobxDepAtom = computed(() => mobxAtom.get())
       autorun(() => mobxDepAtom.get())
@@ -263,8 +277,10 @@ async function testParent(count: number) {
     reatomLogs.push(performance.now() - startReatom)
 
     const startV4 = performance.now()
-    V4Atom(i)
-    V4.notify()
+    V4Root.run(() => {
+      V4Atom(i)
+      V4.notify()
+    })
     V4Logs.push(performance.now() - startV4)
 
     const startMol = performance.now()
@@ -280,15 +296,19 @@ async function testParent(count: number) {
   }
 
   if (
-    new Set([molAtom.sync(), ctx.get(reAtom), V4Atom(), mobxAtom.get()]).size >
-    1
+    new Set([
+      molAtom.sync(),
+      ctx.get(reAtom),
+      V4Root.run(V4Atom),
+      mobxAtom.get(),
+    ]).size > 1
   ) {
     throw new Error(
       'Mismatch: ' +
         JSON.stringify({
           mol: molAtom.sync(),
           reatom: ctx.get(reAtom),
-          V4: V4Atom(),
+          V4: V4Root.run(V4Atom),
           mobx: mobxAtom.get(),
         }),
     )
@@ -306,14 +326,16 @@ async function testParent(count: number) {
 }
 
 ;(async () => {
-  const subscribers = [10, 1000]
+  // const subscribers = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+  const subscribers = [1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 10]
+
   for (const i of subscribers) {
     var results = [
       await testAggregateGrowing(i, 'push'),
       await testAggregateGrowing(i, 'unshift'),
       await testAggregateShrinking(i, 'pop'),
       await testAggregateShrinking(i, 'shift'),
-      await testParent(i),
+      // await testParent(i),
     ]
   }
 

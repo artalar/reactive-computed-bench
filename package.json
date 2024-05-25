@@ -4,7 +4,7 @@
   "description": "Benchmarks of complex computed update performance",
   "scripts": {
     "start": "tsx computers_bench.ts",
-    "start:mem": "node --expose-gc --loader=tsx computers_bench.ts",
+    "start:mem": "node --expose-gc --import=tsx computers_bench.ts",
     "site:dev": "vite dev",
     "site:build": "vite build",
     "update": "npx npm-check-updates -u"

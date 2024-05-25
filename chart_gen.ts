@@ -49,6 +49,7 @@ const PACKAGE_NAMES: Rec<string> = {
   preact: '@preact/signals-core',
   reatom: '@reatom/core',
   solid: 'solid-js',
+  v4: 'v4',
 }
 
 export async function genChart(allResults: BenchResults) {
@@ -193,7 +194,9 @@ async function getChartData(results: BenchResults): Promise<ChartData> {
       moduleName,
       'package.json',
     )
-    const file = await readFile(modulePath, 'utf8')
+    const file = await readFile(modulePath, 'utf8').catch(
+      () => '{"version": "0.0.0"}',
+    )
     const version = JSON.parse(file).version
 
     data.push({
